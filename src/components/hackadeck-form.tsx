@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, Check, Images, Mail, WandSparkles } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -174,9 +175,12 @@ function LatestCardPreview({ eventSlug }: { eventSlug: string }) {
             A peek at what people are hatching from this event.
           </p>
         </div>
-        <span className="shrink-0 text-xs font-semibold tracking-wide text-[#8d5f3a] uppercase">
-          Live
-        </span>
+        <Link
+          href={`/events/${eventSlug}`}
+          className="shrink-0 rounded-sm bg-[#23201b] px-2.5 py-1 text-xs font-semibold text-[#fffaf0] transition-opacity hover:opacity-80"
+        >
+          View full gallery
+        </Link>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3">
@@ -493,7 +497,7 @@ export function HackaDeckForm() {
         type="submit"
       >
         <WandSparkles size={18} aria-hidden="true" />
-        {isSubmitting ? "Starting your card run..." : "Make this card-worthy"}
+        {isSubmitting ? "Starting your card run..." : "Hatch my card"}
         <ArrowRight size={18} aria-hidden="true" />
       </button>
       {error ? (
