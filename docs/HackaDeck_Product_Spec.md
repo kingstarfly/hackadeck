@@ -20,22 +20,24 @@ The style should feel **polished, simple, loved, and shareworthy**, not generica
 
 ### House style
 
-**Name:** Matte Field-Guide Builder Familiars
+**Name:** Soft Familiar Collectibles
 
 **Visual feel:**
 
-- Premium matte collectible card
-- Warm paper or deep charcoal card base
-- Clean animal mascot illustration
-- Restrained spot-color accents
-- Crisp editorial typography
-- Subtle paper grain / print texture
-- Small stamped hackathon edition mark
-- One personal relic or prop per card
-- A little weirdness, but not clutter
+- Gentle 2D illustration, not 3D rendered
+- Soft matte pastel palette (cream, peach, sage, warm gray, soft orange)
+- Simple rounded shapes with minimal or no linework
+- Dot eyes, subtle expressions, shy body language
+- Sumikko Gurashi / children's book illustration energy
+- One personal relic or accessory per familiar
+- Clean negative space, uncluttered composition
+- Charming but not saccharine — slightly melancholic warmth
+- Small stamped hackathon edition mark on card frame
+- Feels like a desk companion you'd want to keep
 
 **Avoid:**
 
+- 3D vinyl figurine product photography
 - Neon AI glow
 - Holographic cyberpunk as the default
 - Glitch / code rain
@@ -43,8 +45,10 @@ The style should feel **polished, simple, loved, and shareworthy**, not generica
 - NFT avatar energy
 - Exact Pokémon / Yu-Gi-Oh / Magic / Space Invaders references
 - Busy fantasy battle-card layouts
+- Overly detailed or realistic illustration
+- Harsh outlines or high contrast
 - Full anime chibi as the default
-- Wizard robes, staffs, glowing eyes, or generic fantasy RPG styling unless explicitly chosen
+- Wizard robes, staffs, glowing eyes, or generic fantasy RPG styling
 
 ### Default character choice
 
@@ -70,6 +74,36 @@ Do not optimize only for “accurate role matching.” Optimize for:
 3. funny enough to share
 4. specific enough to feel personal
 5. consistent enough for the gallery
+
+### Design system layers
+
+The visual design uses **layered contrast** — structured UI chrome frames illustrated content.
+
+| Layer | Direction | Rationale |
+|-------|-----------|-----------|
+| **Website** | Swiss-inspired: warm neutrals (cream, warm gray), clean sans-serif, generous whitespace, minimal chrome | Functional container that lets cards shine. Like museum walls for art. |
+| **Card frame** | Structured zones, readable typography, warm paper tones, subtle texture | Bridge between functional UI and illustrated art. Clear hierarchy for stats/text. |
+| **Avatar art** | Full Sumikko energy: soft pastel, illustrated, character in personal habitat | The personalized, magical artifact. The star of the show. |
+
+**Website palette:**
+- Background: warm cream `#FAF7F2` or soft warm gray
+- Text: dark charcoal `#2D2A26`, never pure black
+- Typography: Inter / system sans-serif
+- Minimal decorative elements — the cards provide visual richness
+
+**Card frame principles:**
+- Structured zones (header, art window, stats, ability, footer)
+- Warm neutral background (cream/paper tones)
+- One accent color per card, pulled from avatar palette
+- Subtle paper grain texture
+- Readable at thumbnail AND full size
+- Consistent template across all cards for gallery coherence
+
+**Why layered contrast works:**
+- The content (cards) is already visually rich and illustrated
+- Structured chrome creates intentional contrast — cards feel special
+- Avoids “same-y” feeling if everything is soft pastels
+- Functional clarity for the webapp, emotional richness for the artifact
 
 ---
 
@@ -573,8 +607,10 @@ type HackaDeckCardSpec = {
   quirk_phrase?: string;
 
   accent_color: string;
+  
+  // Generated directly by GPT-5.5, not template-interpolated
+  // Follows section-by-section structure defined in "Art prompt generation guidance"
   art_prompt: string;
-  negative_prompt_notes: string[];
 };
 ```
 
@@ -589,6 +625,128 @@ type HackaDeckCardSpec = {
 - One meaningful personal relic is better than many generic props.
 - Do not crowd the card with lore; save extra copy for the deck page or future
   manual.
+
+### Art prompt generation guidance
+
+GPT-5.5 generates the `art_prompt` field directly — no template interpolation. The prompt should follow this section-by-section structure, with some sections fixed and others adapted to the participant.
+
+---
+
+**SECTION 1: USE CASE** *(always include verbatim)*
+
+```
+Create central mascot art only for a vertical collectible hackathon card.
+This image will be placed inside a rendered card frame. The app will add 
+all text, stats, badges, and layout separately.
+```
+
+---
+
+**SECTION 2: HOUSE STYLE** *(always include verbatim)*
+
+```
+Soft 2D illustration in the style of Sumikko Gurashi or gentle children's 
+book art. Muted pastel palette (cream, peach, soft orange, sage, warm gray), 
+minimal or no linework, soft subtle shading. Simple rounded shapes, dot eyes, 
+gentle expressions. Charming but not saccharine — slightly shy, melancholic 
+warmth. Feels like a beloved desk companion collectible.
+```
+
+---
+
+**SECTION 3: SUBJECT** *(adapt to participant)*
+
+Describe the familiar as flowing prose. Include:
+- Species and visual descriptor
+- Body language reflecting their build energy
+- Personal relic integrated naturally (held, worn, nearby)
+- How the earned title manifests in their demeanor
+
+Example:
+> A small, calm owl with tiny round glasses and a folded API note tucked under one wing. Sits with patient, watchful energy — the posture of someone who finds the bug everyone else missed. A tiny rubber duck glows softly beside them like a desk lamp companion.
+
+---
+
+**SECTION 4: ENVIRONMENT / HABITAT** *(adapt — this is the personal magic)*
+
+The familiar exists in a personal micro-habitat derived from quiz answers. This creates the "that's me!" moment.
+
+**Input sources** (priority order):
+1. `tiny_detail` — free-text quirk ("40 tabs open", "three chargers")
+2. `weakness` — harmless weakness selection
+3. `relic` — personal relic choice  
+4. `build_energy` — working style
+
+**Environment principles:**
+
+| Principle | Meaning |
+|-----------|---------|
+| VISIBLE | Noticeable at thumbnail size. Teammates point and say "that's the tabs thing." |
+| INTEGRATED | Familiar sits on, among, or surrounded by the detail. Part of the scene. |
+| ON-BRAND | Soft pastel, illustrated. No literal tech. Translate: tabs → papers, debugging → magnifying glass. |
+| CLEAR | Connection between answer and visual is graspable, not a puzzle. |
+| AFFECTIONATE | Cozy, charming, like the familiar's natural habitat. |
+| COMMITTED | One strong visible detail beats several subtle ones. |
+
+**Example environment translations:**
+
+| Quiz Input | Environment in Prompt |
+|------------|----------------------|
+| "40 tabs open" | perched on a towering pile of overlapping papers, some sliding off the edge |
+| "three chargers, no water bottle" | nestled in a cozy tangle of cables, empty mug nearby |
+| "forgot to eat" | surrounded by scattered snack wrappers and crumbs, looking content |
+| "keeps changing the prompt" | sitting among crumpled paper balls and crossed-out notes |
+| "CSS is almost done" | surrounded by floating color swatches and tiny alignment marks |
+| "names variables dramatically" | posed on a tiny spotlight stage with theatrical lighting |
+
+**Lighting mood** (derive from `build_energy`):
+- Deadline gremlin, Last-minute philosopher → warm late-night lamp glow
+- Calm shipper, Quiet optimizer → soft morning light
+- Demo magician → warm spotlight / stage lighting
+- Default → soft diffuse daylight
+
+If no clear environmental detail emerges, a simple cozy desk scene with the relic is fine. Don't force it.
+
+---
+
+**SECTION 5: COMPOSITION** *(always include, minor adaptation OK)*
+
+```
+Single centered character, full body visible, generous padding for card 
+framing. Soft pastel background with the habitat elements. No card frame, 
+no border.
+```
+
+---
+
+**SECTION 6: CONSTRAINTS** *(always include verbatim)*
+
+```
+No text, no letters, no numbers, no logos, no trademarks, no watermark, 
+no 3D rendering, no product photography, no neon, no holographic effects, 
+no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, 
+no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, 
+no high contrast, no literal screens or browser windows.
+```
+
+---
+
+**Full example art_prompt:**
+
+```
+Create central mascot art only for a vertical collectible hackathon card.
+This image will be placed inside a rendered card frame. The app will add all text, stats, badges, and layout separately.
+
+Soft 2D illustration in the style of Sumikko Gurashi or gentle children's book art. Muted pastel palette (cream, peach, soft orange, sage, warm gray), minimal or no linework, soft subtle shading. Simple rounded shapes, dot eyes, gentle expressions. Charming but not saccharine — slightly shy, melancholic warmth. Feels like a beloved desk companion collectible.
+
+A small, calm owl with tiny round glasses perched thoughtfully. Patient, watchful energy — the posture of someone who finds the bug everyone else missed. A tiny rubber duck sits beside them, glowing softly like a warm desk lamp.
+
+The owl is perched among a scattered pile of API documentation pages and folded sticky notes, some sliding off the edge of an unseen desk. Warm late-night lamp glow with soft amber tones fills the scene.
+
+Single centered character, full body visible, generous padding for card framing. Soft pastel background with the habitat elements. No card frame, no border.
+
+No text, no letters, no numbers, no logos, no trademarks, no watermark, no 3D rendering, no product photography, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, no high contrast, no literal screens or browser windows.
+```
 
 ### Example spec
 
@@ -632,8 +790,7 @@ type HackaDeckCardSpec = {
   "chaos_tell": "Opens 37 tabs and somehow knows where everything is.",
   "quirk_phrase": "Show me the headers.",
   "accent_color": "#7A5C3E",
-  "art_prompt": "...",
-  "negative_prompt_notes": ["no neon", "no holographic effects", "no card text"]
+  "art_prompt": "Create central mascot art only for a vertical collectible hackathon card. This image will be placed inside a rendered card frame. The app will add all text, stats, badges, and layout separately.\n\nSoft 2D illustration in the style of Sumikko Gurashi or gentle children's book art. Muted pastel palette (cream, peach, soft orange, sage, warm gray), minimal or no linework, soft subtle shading. Simple rounded shapes, dot eyes, gentle expressions. Charming but not saccharine — slightly shy, melancholic warmth. Feels like a beloved desk companion collectible.\n\nA small, calm owl with tiny round glasses perched thoughtfully. Patient, watchful energy — the posture of someone who finds the bug everyone else missed. A tiny rubber duck sits beside them, glowing softly like a warm desk lamp.\n\nThe owl is perched among a scattered pile of API documentation pages and folded sticky notes, some sliding off the edge of an unseen desk. Warm late-night lamp glow with soft amber tones fills the scene.\n\nSingle centered character, full body visible, generous padding for card framing. Soft pastel background with the habitat elements. No card frame, no border.\n\nNo text, no letters, no numbers, no logos, no trademarks, no watermark, no 3D rendering, no product photography, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, no high contrast, no literal screens or browser windows."
 }
 ```
 
@@ -735,71 +892,44 @@ Use this for a demo-only “collector poster” or “rare print” version, not
 
 ---
 
-## 12. Exact familiar art prompt template
+## 12. Art prompt generation
 
-Use this as the default GPT Image 2 prompt.
+The `art_prompt` field is generated directly by GPT-5.5 as part of the card spec — not template-interpolated.
 
-```txt
-Create central mascot art only for a vertical collectible hackathon card.
+See **Section 8: Art prompt generation guidance** for the section-by-section structure that GPT-5.5 follows when generating art prompts.
 
-Use case:
-This image will be placed inside a rendered card frame. The app will add all text, stats, badges, and layout separately.
-
-House style:
-Premium matte editorial mascot illustration. Warm off-white paper feel, restrained spot-color palette, clean ink outline, subtle print grain, simple rounded shapes, crisp readable silhouette, charming but not childish. It should feel like a polished conference collectible or modern field-guide card, not a fantasy battle card.
-
-Subject:
-A {animal_species} builder familiar representing a hackathon participant.
-
-Participant traits:
-- Role: {role_today}
-- Card intent: {card_intent}
-- Build energy: {build_energy}
-- Strengths: {powers}
-- Harmless weakness: {weakness}
-- Earned title: {earned_title}
-- Personal relic: {personal_relic_visual}
-- Tiny personal detail: {tiny_detail}
-
-Visual direction:
-Show the familiar as a small desk companion observed during a real hackathon. Include exactly one meaningful personal relic or developer-themed prop. The relic should feel specific to this person. One meaningful prop is better than many generic coding objects.
-
-Composition:
-Single centered character, full body visible, generous padding, three-quarter view, clean silhouette. Simple warm background shape or paper-toned backdrop. No card frame.
-
-Constraints:
-No text, no letters, no numbers, no logos, no trademarks, no watermark, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no busy background, no wizard robes, no fantasy armor, no magical staffs, no dramatic spell effects, no glowing eyes.
-```
+The key principle: some sections are fixed (house style, constraints) while others adapt to the participant (subject, environment/habitat).
 
 ---
 
-## 13. Reroll prompt template
+## 13. Reroll prompt generation
+
+For rerolls, GPT-5.5 generates a variation prompt that preserves identity while changing pose/expression.
+
+**Reroll prompt structure:**
 
 ```txt
 Create a new variation of the same builder familiar concept.
 
-Preserve:
-- same animal species: {animal_species}
-- same role: {role_today}
-- same card intent: {card_intent}
-- same build energy: {build_energy}
-- same strengths: {powers}
-- same harmless weakness: {weakness}
-- same earned title: {earned_title}
-- same personal relic: {personal_relic_visual}
-- same premium matte editorial field-guide style
-- no text, no logos, no card border
+[INSERT ORIGINAL ART_PROMPT HERE]
 
-Change:
-- pose
-- expression
-- small prop arrangement
-- background shape
+VARIATION INSTRUCTIONS:
+Keep everything about the character and environment the same:
+- Same animal species and visual traits
+- Same personal relic
+- Same environment / habitat setting
+- Same lighting mood
+- Same soft 2D illustration style (Sumikko Gurashi / children's book energy)
+- Same muted pastel palette
+
+Change only:
+- Pose (still shy/gentle, but different position)
+- Expression (subtle variation in dot eyes or head tilt)
+- Accessory arrangement within the same habitat
+- Slight background color variation (same mood, different soft pastel)
+```
 
 Keep the character centered, full body visible, with generous padding and a clean silhouette.
-
-Avoid neon, holographic rainbow effects, cyberpunk, glitch, code rain, circuit patterns, busy backgrounds, fantasy robes, armor, staffs, and glowing eyes.
-```
 
 ---
 
@@ -808,23 +938,24 @@ Avoid neon, holographic rainbow effects, cyberpunk, glitch, code rain, circuit p
 Use as an edit-style enhancement if supported in the implementation.
 
 ```txt
-Create a rarer print-finish version of the same familiar.
+Create a rarer version of the same familiar with subtle special details.
 
 Preserve:
 - same animal species
-- same silhouette
-- same personal relic
-- same warm matte editorial style
-- same restrained palette
+- same silhouette and pose
+- same personal relic/accessory
+- same soft 2D illustration style
+- same muted pastel palette base
 - no text, no logos, no card border
 
 Change only:
-- add a small embossed edition-seal feeling
-- add subtle metallic ink accents
-- add tasteful spot-gloss highlights
-- make it feel more collectible without becoming futuristic
+- add a subtle warm glow or soft halo behind the familiar
+- add a tiny sparkle or star accent near the relic
+- slightly warmer or more saturated accent color
+- add a delicate pattern to the accessory (tiny dots, subtle texture)
+- make it feel slightly more precious without losing the gentle aesthetic
 
-Avoid neon, holographic rainbow effects, glitch, cyberpunk, code rain, circuit patterns, and busy backgrounds.
+Avoid neon, holographic rainbow effects, 3D rendering, glitch, cyberpunk, code rain, circuit patterns, busy backgrounds, harsh lighting, and dramatic effects.
 ```
 
 ---
@@ -1446,7 +1577,7 @@ Field Note: Can de-escalate scope creep with one nod.
 
 - Use **Builder Familiar** as the default identity form.
 - Use mostly **regular animals** for polish and shareability.
-- Use **Matte Field-Guide** style instead of holo-tech/neon AI visuals.
+- Use **Soft Familiar Collectibles** style (Sumikko Gurashi / children's book energy) instead of holo-tech/neon AI visuals.
 - Add **personal relics**, **earned titles**, and **field notes** so cards feel loved.
 - Generate **central art only** with GPT Image 2.
 - Render card layout and text in code.

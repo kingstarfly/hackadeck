@@ -25,3 +25,7 @@ Use the default triage label vocabulary: `needs-triage`, `needs-info`, `ready-fo
 ### Domain docs
 
 This is a single-context repo: read root `CONTEXT.md` and relevant ADRs in `docs/adr/` when they exist. See `docs/agents/domain.md`.
+
+### Frontend UI
+
+Use shadcn/Radix/Tailwind primitives for standard app controls before creating new one-off elements. Prefer existing components from `src/components/ui`; when a missing shadcn component fits the interaction, add it with the shadcn CLI instead of hand-rolling a lookalike. Bespoke styling is fine for the collectible card renderer and gallery presentation when the artifact needs custom layout.
