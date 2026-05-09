@@ -69,10 +69,14 @@ export function HackaDeckForm() {
   // Load draft from localStorage on mount
   useEffect(() => {
     const saved = loadDraft();
-    setDraft(saved);
+    const recoveryEmail = searchParams.get("recoveryEmail");
+    setDraft({
+      ...saved,
+      ...(recoveryEmail ? { recoveryEmail } : {}),
+    });
     if (saved.powers) setSelectedPowers(saved.powers);
     setHydrated(true);
-  }, []);
+  }, [searchParams]);
 
   const urlEventSlug = searchParams.get("event");
   const defaultEventSlug = useMemo(() => {

@@ -1,0 +1,256 @@
+import { convexTest } from "convex-test";
+import { describe, expect, it } from "vitest";
+
+import { api } from "./_generated/api";
+import schema from "./schema";
+
+declare global {
+  interface ImportMeta {
+    glob(pattern: string): Record<string, () => Promise<unknown>>;
+  }
+}
+
+const modules = import.meta.glob("./**/*.*s");
+
+const baseSpec = {
+  display_name: "Maya",
+  edition: "AI Engineers Singapore 2026",
+  card_number: 1,
+  earned_title: "Keeper of the Tiny Repro",
+  archetype_base: "Bug Hunter",
+  card_intent: "My actual role today",
+  familiar_species: "Owl",
+  familiar_descriptor: "a calm debug owl",
+  personal_relic: {
+    name: "Rubber Duck Lantern",
+    visual: "a tiny yellow rubber duck holding a warm desk lamp",
+    meaning: "helps them debug without panic",
+  },
+  rarity: "Rare" as const,
+  print_finish: "Stamped" as const,
+  stats: { Build: 82, Debug: 96, Taste: 74, Chaos: 68 },
+  signature_move: {
+    name: "Endpoint Exorcism",
+    description: "Turns one haunted API response into clean JSON.",
+  },
+  stat_icons: {
+    Build: "hammer" as const,
+    Debug: "lantern" as const,
+    Taste: "star" as const,
+    Chaos: "bolt" as const,
+  },
+  field_note: "Spotted listening to headers when the docs go quiet.",
+  accent_color: "#7A5C3E",
+  art_prompt: "Create a calm debug owl.",
+  negative_prompt_notes: ["no text"],
+};
+
+async function seedEvent(t: ReturnType<typeof convexTest>, slug: string) {
+  const now = Date.now();
+
+  return await t.run(async (ctx) => {
+    return await ctx.db.insert("events", {
+      name: slug,
+      slug,
+      startsAt: now,
+      isActive: true,
+      createdAt: now,
+    });
+  });
+}
+
+async function seedParticipantDeck(
+  t: ReturnType<typeof convexTest>,
+  args: { eventId: string; email: string; displayName: string },
+) {
+  return await t.run(async (ctx) => {
+    const now = Date.now();
+    const participantId = await ctx.db.insert("participants", {
+      eventId: args.eventId as never,
+      recoveryEmail: args.email,
+      displayName: args.displayName,
+      consentGallery: true,
+      createdAt: now,
+    });
+
+    const firstRunId = await ctx.db.insert("cardRuns", {
+      eventId: args.eventId as never,
+      participantId,
+      cardNumber: 1,
+      status: "done",
+      formAnswers: {},
+      createdAt: now - 1000,
+      updatedAt: now - 1000,
+    });
+    const firstCardId = await ctx.db.insert("cards", {
+      eventId: args.eventId as never,
+      participantId,
+      runId: firstRunId,
+      cardNumber: 1,
+      spec: baseSpec,
+      avatarImageUrl: "https://example.com/owl.png",
+      isFavorite: false,
+      isPublic: true,
+      createdAt: now - 1000,
+    });
+    const firstLookId = await ctx.db.insert("looks", {
+      eventId: args.eventId as never,
+      cardId: firstCardId,
+      runId: firstRunId,
+      lookNumber: 1,
+      reason: "initial",
+      specSnapshot: baseSpec,
+      avatarImageUrl: "https://example.com/owl-look-1.png",
+      createdAt: now - 1000,
+    });
+
+    const secondRunId = await ctx.db.insert("cardRuns", {
+      eventId: args.eventId as never,
+      participantId,
+      cardNumber: 2,
+      status: "done",
+      formAnswers: {},
+      createdAt: now,
+      updatedAt: now,
+    });
+    const secondCardId = await ctx.db.insert("cards", {
+      eventId: args.eventId as never,
+      participantId,
+      runId: secondRunId,
+      cardNumber: 2,
+      spec: {
+        ...baseSpec,
+        card_number: 2,
+        earned_title: "Captain of Last-Minute Polish",
+        familiar_species: "Otter",
+      },
+      avatarImageUrl: "https://example.com/otter.png",
+      isFavorite: false,
+      isPublic: true,
+      createdAt: now,
+    });
+    const secondLookId = await ctx.db.insert("looks", {
+      eventId: args.eventId as never,
+      cardId: secondCardId,
+      runId: secondRunId,
+      lookNumber: 1,
+      reason: "initial",
+      specSnapshot: {
+        ...baseSpec,
+        card_number: 2,
+        earned_title: "Captain of Last-Minute Polish",
+        familiar_species: "Otter",
+      },
+      avatarImageUrl: "https://example.com/otter-look-1.png",
+      createdAt: now,
+    });
+    const rerollLookId = await ctx.db.insert("looks", {
+      eventId: args.eventId as never,
+      cardId: secondCardId,
+      runId: secondRunId,
+      lookNumber: 2,
+      reason: "art_reroll",
+      specSnapshot: {
+        ...baseSpec,
+        card_number: 2,
+        earned_title: "Captain of Last-Minute Polish",
+        familiar_species: "Otter",
+      },
+      avatarImageUrl: "https://example.com/otter-look-2.png",
+      createdAt: now + 1,
+    });
+
+    await ctx.db.patch(firstCardId, { selectedLookId: firstLookId });
+    await ctx.db.patch(firstRunId, { cardId: firstCardId });
+    await ctx.db.patch(secondCardId, { selectedLookId: secondLookId });
+    await ctx.db.patch(secondRunId, { cardId: secondCardId });
+    await ctx.db.patch(participantId, { selectedCardId: secondCardId });
+
+    return {
+      participantId,
+      firstCardId,
+      secondCardId,
+      secondLookId,
+      rerollLookId,
+    };
+  });
+}
+
+describe("participant deck", () => {
+  it("returns cards newest first with looks for the scoped event participant", async () => {
+    const t = convexTest(schema, modules);
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    const otherEventId = await seedEvent(t, "other-hack");
+    const deckIds = await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+    await seedParticipantDeck(t, {
+      eventId: otherEventId,
+      email: "maya@example.com",
+      displayName: "Other Maya",
+    });
+
+    const deck = await t.query(api.deck.getParticipantDeck, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+    });
+
+    expect(deck?.cards.map((card) => card.cardNumber)).toEqual([2, 1]);
+    expect(deck?.cards[0]?.looks.map((look) => look.lookNumber)).toEqual([
+      1, 2,
+    ]);
+    expect(deck?.participant.selectedCardId).toBe(deckIds.secondCardId);
+  });
+
+  it("updates selected card and look only inside the participant event scope", async () => {
+    const t = convexTest(schema, modules);
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    const otherEventId = await seedEvent(t, "other-hack");
+    const deckIds = await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+    const otherDeckIds = await seedParticipantDeck(t, {
+      eventId: otherEventId,
+      email: "other@example.com",
+      displayName: "Other",
+    });
+
+    await t.mutation(api.deck.selectCard, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+      cardId: deckIds.firstCardId,
+    });
+    await t.mutation(api.deck.selectLook, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+      cardId: deckIds.secondCardId,
+      lookId: deckIds.rerollLookId,
+    });
+
+    const participant = await t.run((ctx) => ctx.db.get(deckIds.participantId));
+    const secondCard = await t.run((ctx) => ctx.db.get(deckIds.secondCardId));
+
+    expect(participant?.selectedCardId).toBe(deckIds.firstCardId);
+    expect(secondCard?.selectedLookId).toBe(deckIds.rerollLookId);
+
+    await expect(
+      t.mutation(api.deck.selectCard, {
+        eventSlug: "ai-engineer-hack-2026",
+        participantId: deckIds.participantId,
+        cardId: otherDeckIds.secondCardId,
+      }),
+    ).rejects.toThrow("Card not found for this participant deck.");
+    await expect(
+      t.mutation(api.deck.selectLook, {
+        eventSlug: "ai-engineer-hack-2026",
+        participantId: deckIds.participantId,
+        cardId: deckIds.secondCardId,
+        lookId: otherDeckIds.rerollLookId,
+      }),
+    ).rejects.toThrow("Look not found for this card.");
+  });
+});
