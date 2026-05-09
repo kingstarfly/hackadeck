@@ -1,0 +1,53 @@
+{
+  "name": "hackadeck",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "pnpm lint:oxlint",
+    "lint:oxlint": "oxlint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prettier": "pnpm format",
+    "prettier:check": "pnpm format:check",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:convex": "vitest run --project convex",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "gate": "pnpm check && pnpm build"
+  },
+  "dependencies": {
+    "@convex-dev/react-query": "^0.0.0-alpha.10",
+    "@vercel/analytics": "^1.5.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "convex": "^1.38.0",
+    "html-to-image": "^1.11.13",
+    "lucide-react": "^0.555.0",
+    "next": "^16.2.6",
+    "openai": "^6.10.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "convex-test": "^0.0.51",
+    "oxlint": "^1.63.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
+  }
+}

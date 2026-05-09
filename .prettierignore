@@ -1,0 +1,6 @@
+.next
+.agents
+node_modules
+pnpm-lock.yaml
+convex/_generated
+HackaDeck_Product_Spec.md
