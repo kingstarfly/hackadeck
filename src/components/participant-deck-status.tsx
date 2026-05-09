@@ -7,6 +7,7 @@ import type { Route } from "next";
 
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { CardRenderer } from "@/components/card/card-renderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -122,24 +123,20 @@ export function ParticipantDeckStatus(props: {
       )}
 
       {deck.selectedCard ? (
-        <div className="mt-5 overflow-hidden rounded-md border border-[#e3d7c4] bg-[#faf7f2]">
-          <img
-            src={
+        <div className="mt-6">
+          <CardRenderer
+            spec={deck.selectedCard.spec}
+            imageUrl={
               deck.selectedCard.selectedLook?.avatarImageUrl ??
               deck.selectedCard.avatarImageUrl
             }
-            alt={`${deck.selectedCard.spec.familiar_species} familiar art for ${deck.participant.displayName}`}
-            className="aspect-square w-full object-cover"
+            cardNumber={deck.selectedCard.cardNumber}
+            eventName={deck.event.name}
+            participantDisplayName={deck.participant.displayName}
+            selectedLookLabel={`Look ${
+              deck.selectedCard.selectedLook?.lookNumber ?? 1
+            }`}
           />
-          <div className="p-4">
-            <p className="text-xs font-semibold tracking-[0.14em] text-[#8d5f3a] uppercase">
-              Look {deck.selectedCard.selectedLook?.lookNumber ?? 1}
-            </p>
-            <p className="mt-2 text-lg font-bold text-[#23201b]">
-              {deck.selectedCard.spec.earned_title} ·{" "}
-              {deck.selectedCard.spec.familiar_species}
-            </p>
-          </div>
         </div>
       ) : null}
 
