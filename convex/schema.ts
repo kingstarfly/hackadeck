@@ -1,7 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const cardSpec = v.object({
+export const cardSpecValidator = v.object({
   display_name: v.string(),
   team_name: v.optional(v.string()),
   edition: v.string(),
@@ -102,6 +102,7 @@ export default defineSchema({
       v.literal("error"),
     ),
     formAnswers: v.any(),
+    spec: v.optional(cardSpecValidator),
     cardId: v.optional(v.id("cards")),
     errorMessage: v.optional(v.string()),
     createdAt: v.number(),
@@ -116,7 +117,7 @@ export default defineSchema({
     runId: v.id("cardRuns"),
     cardNumber: v.number(),
     selectedLookId: v.optional(v.id("looks")),
-    spec: cardSpec,
+    spec: cardSpecValidator,
     avatarImageUrl: v.string(),
     finalPngUrl: v.optional(v.string()),
     isFavorite: v.boolean(),
@@ -133,7 +134,7 @@ export default defineSchema({
     runId: v.id("cardRuns"),
     lookNumber: v.number(),
     reason: v.union(v.literal("initial"), v.literal("art_reroll")),
-    specSnapshot: cardSpec,
+    specSnapshot: cardSpecValidator,
     avatarImageUrl: v.string(),
     finalPngUrl: v.optional(v.string()),
     createdAt: v.number(),

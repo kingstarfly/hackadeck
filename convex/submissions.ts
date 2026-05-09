@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 
+import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 
 const formAnswersValidator = v.object({
@@ -129,6 +130,14 @@ export const submitQuiz = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    await ctx.scheduler.runAfter(
+      0,
+      internal.cardSpecGeneration.generateForRun,
+      {
+        runId,
+      },
+    );
 
     return {
       eventSlug,

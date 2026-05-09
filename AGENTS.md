@@ -18,6 +18,14 @@ Convex agent skills for common tasks can be installed by running
 
 Issues and PRDs are tracked in GitHub Issues for `kingstarfly/hackadeck`. See `docs/agents/issue-tracker.md`.
 
+Before closing any implementation issue:
+
+1. Commit the implementation.
+2. Run `pnpm gate` and make sure it passes. This includes `pnpm convex:check`, which runs `convex dev --once` to push Convex schema/functions to the configured dev deployment and regenerate TypeScript bindings.
+3. Update the issue body so completed acceptance criteria are checked off (`- [x]`).
+4. Leave the required completion comment with notes, deviations, setup, and follow-ups.
+5. Close the issue.
+
 ### Triage labels
 
 Use the default triage label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.

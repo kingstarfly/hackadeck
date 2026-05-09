@@ -8,6 +8,10 @@
  * @module
  */
 
+import type * as cardSpecCore from "../cardSpecCore.js";
+import type * as cardSpecGeneration from "../cardSpecGeneration.js";
+import type * as cardSpecState from "../cardSpecState.js";
+import type * as deck from "../deck.js";
 import type * as submissions from "../submissions.js";
 
 import type {
@@ -17,6 +21,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  cardSpecCore: typeof cardSpecCore;
+  cardSpecGeneration: typeof cardSpecGeneration;
+  cardSpecState: typeof cardSpecState;
+  deck: typeof deck;
   submissions: typeof submissions;
 }>;
 

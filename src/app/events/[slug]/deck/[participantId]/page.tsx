@@ -1,6 +1,4 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
+import { ParticipantDeckStatus } from "@/components/participant-deck-status";
 
 type DeckPageProps = {
   params: Promise<{
@@ -21,22 +19,10 @@ export default async function DeckPage({ params }: DeckPageProps) {
         Your card is queued
       </h1>
       <p className="mt-5 max-w-2xl text-lg leading-7 text-[#51493d]">
-        Your Builder Familiar card run has started. The generation controls land
-        here next, and this page already has the participant deck URL shape.
+        Your Builder Familiar card run has started. Keep this page open while
+        the live deck updates itself.
       </p>
-      <dl className="mt-8 grid gap-3 rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 text-sm text-[#51493d]">
-        <div>
-          <dt className="font-bold">Event</dt>
-          <dd>{slug}</dd>
-        </div>
-        <div>
-          <dt className="font-bold">Participant</dt>
-          <dd className="break-all">{participantId}</dd>
-        </div>
-      </dl>
-      <Button asChild className="mt-6 w-fit">
-        <Link href={`/?event=${slug}`}>Start another card</Link>
-      </Button>
+      <ParticipantDeckStatus eventSlug={slug} participantId={participantId} />
     </main>
   );
 }
