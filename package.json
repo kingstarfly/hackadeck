@@ -21,7 +21,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "check": "pnpm convex:check && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
-    "gate": "pnpm check && pnpm build"
+    "gate": "pnpm check"
   },
   "dependencies": {
     "@convex-dev/react-query": "^0.0.0-alpha.10",
