@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, WandSparkles } from "lucide-react";
+import { useMutation } from "convex/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { Route } from "next";
 
+import { api } from "../../convex/_generated/api";
 import {
   buildEnergyOptions,
   cardFormOptions,
@@ -13,10 +17,17 @@ import {
   roleOptions,
   weaknessOptions,
 } from "@/lib/form-options";
+import { formAnswerSchema } from "@/lib/card-schema";
 import { cn } from "@/lib/utils";
 
 export function HackaDeckForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const submitQuiz = useMutation(api.submissions.submitQuiz);
   const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const eventSlug = searchParams.get("event") ?? "ai-engineer-hack-2026";
 
   const powerHelp = useMemo(() => {
     const remaining = 3 - selectedPowers.length;
@@ -39,9 +50,69 @@ export function HackaDeckForm() {
     });
   }
 
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    const formData = new FormData(event.currentTarget);
+    const parsed = formAnswerSchema.safeParse({
+      eventSlug: String(formData.get("eventSlug") ?? ""),
+      recoveryEmail: String(formData.get("recoveryEmail") ?? ""),
+      displayName: String(formData.get("displayName") ?? ""),
+      teamName: String(formData.get("teamName") ?? "") || undefined,
+      roleToday: String(formData.get("roleToday") ?? ""),
+      cardIntent: String(formData.get("cardIntent") ?? ""),
+      buildEnergy: String(formData.get("buildEnergy") ?? ""),
+      powers: formData.getAll("powers").map(String),
+      weakness: String(formData.get("weakness") ?? ""),
+      relic: String(formData.get("relic") ?? ""),
+      cardForm: String(formData.get("cardForm") ?? ""),
+      familiarPreference: String(formData.get("familiarPreference") ?? ""),
+      detail: String(formData.get("detail") ?? "") || undefined,
+      consentGallery: formData.get("consentGallery") === "on",
+    });
+
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Check your answers.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const answers = {
+        eventSlug: parsed.data.eventSlug,
+        recoveryEmail: parsed.data.recoveryEmail,
+        displayName: parsed.data.displayName,
+        roleToday: parsed.data.roleToday,
+        cardIntent: parsed.data.cardIntent,
+        buildEnergy: parsed.data.buildEnergy,
+        powers: parsed.data.powers,
+        weakness: parsed.data.weakness,
+        relic: parsed.data.relic,
+        cardForm: parsed.data.cardForm,
+        familiarPreference: parsed.data.familiarPreference,
+        consentGallery: parsed.data.consentGallery,
+        ...(parsed.data.teamName ? { teamName: parsed.data.teamName } : {}),
+        ...(parsed.data.detail ? { detail: parsed.data.detail } : {}),
+      };
+      const result = await submitQuiz({ answers });
+      router.push(result.deckPath as Route);
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "The card run could not be started.",
+      );
+      setIsSubmitting(false);
+    }
+  }
+
   return (
-    <form className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-6">
-      <input name="eventSlug" type="hidden" value="ai-engineer-hack-2026" />
+    <form
+      className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-6"
+      onSubmit={handleSubmit}
+    >
+      <input name="eventSlug" type="hidden" value={eventSlug} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
@@ -277,13 +348,19 @@ export function HackaDeckForm() {
       </label>
 
       <button
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[#23201b] px-5 py-4 text-base font-black text-[#fffaf0] transition hover:bg-[#3a332a]"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[#23201b] px-5 py-4 text-base font-black text-[#fffaf0] transition hover:bg-[#3a332a] disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isSubmitting}
         type="submit"
       >
         <WandSparkles size={18} aria-hidden="true" />
-        Make this card-worthy
+        {isSubmitting ? "Starting your card run..." : "Make this card-worthy"}
         <ArrowRight size={18} aria-hidden="true" />
       </button>
+      {error ? (
+        <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }

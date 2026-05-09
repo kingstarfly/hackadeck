@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", inter.variable)}>
       <body>
-        {children}
+        <ConvexClientProvider>{children}</ConvexClientProvider>
         <Analytics />
       </body>
     </html>
