@@ -19,7 +19,7 @@ export default async function DeckPage({ params }: DeckPageProps) {
         Your card is queued
       </h1>
       <p className="mt-5 max-w-2xl text-lg leading-7 text-[#51493d]">
-        Your Builder Familiar card run has started. Keep this page open while
+        Your animal companion card run has started. Keep this page open while
         the live deck updates itself.
       </p>
       <ParticipantDeckStatus eventSlug={slug} participantId={participantId} />

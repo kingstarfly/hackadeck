@@ -17,7 +17,7 @@ export default async function CardPage({ params }: CardPageProps) {
 
       <section className="flex flex-col justify-center">
         <p className="text-sm font-semibold tracking-[0.18em] text-[#8d5f3a] uppercase">
-          Builder Familiar
+          Animal Companion
         </p>
         <h1 className="mt-2 text-4xl font-black tracking-tight">
           Your card is hatching

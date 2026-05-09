@@ -25,8 +25,7 @@ const answers = {
   powers: ["Fixing APIs", "Reading stack traces"],
   weakness: "Too many tabs",
   relic: "Rubber duck",
-  cardForm: "Builder Familiar",
-  familiarPreference: "Owl",
+  animalCompanionPreference: "Owl",
   detail: "I always blame headers first.",
   consentGallery: true,
 };

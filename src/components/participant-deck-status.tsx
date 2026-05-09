@@ -24,7 +24,7 @@ const STATUS_COPY = {
   spec_generating: "Matching your familiar...",
   art_generating: "Hatching card art...",
   rendering: "Printing your card...",
-  done: "Your Builder Familiar is ready.",
+  done: "Your animal companion is ready.",
   error: "The familiar matcher got tangled.",
 } as const;
 

@@ -14,8 +14,7 @@ const formAnswersValidator = v.object({
   powers: v.array(v.string()),
   weakness: v.string(),
   relic: v.string(),
-  cardForm: v.string(),
-  familiarPreference: v.string(),
+  animalCompanionPreference: v.string(),
   detail: v.optional(v.string()),
   consentGallery: v.boolean(),
 });

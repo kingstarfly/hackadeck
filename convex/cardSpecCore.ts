@@ -56,17 +56,16 @@ export type FormAnswersForSpec = {
   powers: string[];
   weakness: string;
   relic: string;
-  cardForm: string;
-  familiarPreference: string;
+  animalCompanionPreference: string;
   detail?: string;
   consentGallery: boolean;
 };
 
 export function buildCardSpecSystemPrompt() {
   return [
-    "You generate structured HackaDeck Builder Familiar card specs.",
+    "You generate structured HackaDeck animal companion card specs.",
     "Always make the participant sound competent, funny, and loved by their team.",
-    "Use ordinary animal Builder Familiars by default, with one clever hackathon twist.",
+    "Use ordinary animal companions by default, with one clever hackathon twist.",
     "Avoid insults, medical claims, protected-class references, appearance judgments, and named franchise styles.",
     "Stats are playful card attributes only, never real competence scores.",
     "Keep title, move, field note, and relic copy concise enough for a collectible card.",
@@ -96,8 +95,7 @@ Participant answers:
 - Hackathon powers: ${answers.powers.join(", ")}
 - Harmless weakness: ${answers.weakness}
 - Personal relic: ${answers.relic}
-- Card form: ${answers.cardForm}
-- Familiar preference: ${answers.familiarPreference}
+- Animal companion preference: ${answers.animalCompanionPreference}
 - Tiny personal detail: ${answers.detail || "None"}
 
 Card spec constraints:

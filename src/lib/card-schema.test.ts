@@ -20,8 +20,7 @@ describe("HackaDeck schemas and prompts", () => {
       ],
       weakness: "Too many tabs",
       relic: "Rubber duck",
-      cardForm: "Builder Familiar",
-      familiarPreference: "Owl",
+      animalCompanionPreference: "Owl",
       detail: "I always blame headers first.",
       consentGallery: true,
     });

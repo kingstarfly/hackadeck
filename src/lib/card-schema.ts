@@ -56,8 +56,7 @@ export const formAnswerSchema = z.object({
   powers: z.array(z.string()).min(1).max(3),
   weakness: z.string().min(1),
   relic: z.string().min(1),
-  cardForm: z.string().min(1),
-  familiarPreference: z.string().min(1),
+  animalCompanionPreference: z.string().min(1),
   detail: z.string().max(160).optional(),
   consentGallery: z.boolean(),
 });

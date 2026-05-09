@@ -44,7 +44,7 @@ No text, no letters, no numbers, no logos, no trademarks, no watermark, no neon,
 
 export function buildCardSpecSystemPrompt() {
   return [
-    "You generate structured HackaDeck Builder Familiar cards.",
+    "You generate structured HackaDeck animal companion cards.",
     "Keep everything flattering, funny, harmless, and concise.",
     "Use ordinary animal familiars by default, with one clever hackathon twist.",
     "Do not reference protected classes, appearance judgments, medical claims, or copyrighted card-game styles.",
@@ -65,8 +65,7 @@ Build energy: ${answers.buildEnergy}
 Powers: ${answers.powers.join(", ")}
 Harmless weakness: ${answers.weakness}
 Personal relic: ${answers.relic}
-Card form: ${answers.cardForm}
-Familiar preference: ${answers.familiarPreference}
+Animal companion preference: ${answers.animalCompanionPreference}
 Detail: ${answers.detail || "None"}
 Edition: AI Engineers Singapore 2026`;
 }

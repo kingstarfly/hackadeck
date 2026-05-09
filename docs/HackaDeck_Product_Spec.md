@@ -4,7 +4,7 @@
 
 **Core promise:**
 
-> Scan a QR code. In under a minute, hatch your limited-edition Builder Familiar card.
+> Scan a QR code. In under a minute, hatch your limited-edition animal companion card.
 
 **Emotional target:**
 
@@ -14,7 +14,7 @@
 
 ## 1. Final product direction
 
-HackaDeck turns a live hackathon into a collectible card wall. Each builder gets matched with a **Builder Familiar**: a small animal companion that captures their role, working style, harmless weakness, personal relic, and hackathon chaos pattern.
+HackaDeck turns a live hackathon into a collectible card wall. Each builder gets matched with an **animal companion** that captures their role, working style, harmless weakness, personal relic, and hackathon chaos pattern.
 
 The style should feel **polished, simple, loved, and shareworthy**, not generically AI-coded.
 
@@ -63,7 +63,7 @@ Why:
 - Avoids the generic AI-avatar look
 - Lets the card feel affectionate instead of self-serious
 
-Use “pet” energy, but present it as a **Builder Familiar**.
+Use "pet" energy, but present it as an **animal companion**.
 
 ### Core design principle
 
@@ -288,7 +288,7 @@ The quiz should feel like a personality quiz, not a form. Use multiple choice fo
 - 2–3 hackathon powers
 - Harmless weakness
 - Personal relic
-- Familiar preference
+- Animal companion preference
 - One tiny personal detail
 - Gallery opt-in, default checked
 
@@ -418,16 +418,7 @@ Single choice:
 - Terminal lantern
 - Surprise me
 
-#### 10. Choose your card form
-
-Single choice:
-
-- **Builder Familiar** — animal companion, recommended
-- **Maker Avatar** — tiny stylized builder persona, optional fallback
-
-Default to Builder Familiar.
-
-#### 11. Familiar preference
+#### 10. Choose your animal companion
 
 Single choice:
 
@@ -1575,7 +1566,7 @@ Field Note: Can de-escalate scope creep with one nod.
 
 ## 27. Final design decision summary
 
-- Use **Builder Familiar** as the default identity form.
+- Use **animal companion** as the only MVP identity form.
 - Use mostly **regular animals** for polish and shareability.
 - Use **Soft Familiar Collectibles** style (Sumikko Gurashi / children's book energy) instead of holo-tech/neon AI visuals.
 - Add **personal relics**, **earned titles**, and **field notes** so cards feel loved.

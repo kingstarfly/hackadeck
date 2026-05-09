@@ -8,10 +8,9 @@ import type { Route } from "next";
 
 import { api } from "../../convex/_generated/api";
 import {
+  animalCompanionOptions,
   buildEnergyOptions,
-  cardFormOptions,
   cardIntentOptions,
-  familiarOptions,
   powerOptions,
   relicOptions,
   roleOptions,
@@ -66,8 +65,9 @@ export function HackaDeckForm() {
       powers: formData.getAll("powers").map(String),
       weakness: String(formData.get("weakness") ?? ""),
       relic: String(formData.get("relic") ?? ""),
-      cardForm: String(formData.get("cardForm") ?? ""),
-      familiarPreference: String(formData.get("familiarPreference") ?? ""),
+      animalCompanionPreference: String(
+        formData.get("animalCompanionPreference") ?? "",
+      ),
       detail: String(formData.get("detail") ?? "") || undefined,
       consentGallery: formData.get("consentGallery") === "on",
     });
@@ -89,8 +89,7 @@ export function HackaDeckForm() {
         powers: parsed.data.powers,
         weakness: parsed.data.weakness,
         relic: parsed.data.relic,
-        cardForm: parsed.data.cardForm,
-        familiarPreference: parsed.data.familiarPreference,
+        animalCompanionPreference: parsed.data.animalCompanionPreference,
         consentGallery: parsed.data.consentGallery,
         ...(parsed.data.teamName ? { teamName: parsed.data.teamName } : {}),
         ...(parsed.data.detail ? { detail: parsed.data.detail } : {}),
@@ -289,34 +288,18 @@ export function HackaDeckForm() {
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">Card form</span>
-          <select
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            name="cardForm"
-            defaultValue="Builder Familiar"
-          >
-            {cardFormOptions.map((form) => (
-              <option key={form} value={form}>
-                {form}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="grid gap-2">
           <span className="text-sm font-bold text-[#51493d]">
-            Familiar preference
+            Animal companion
           </span>
           <select
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            name="familiarPreference"
+            name="animalCompanionPreference"
             defaultValue="Surprise me"
           >
-            {familiarOptions.map((familiar) => (
-              <option key={familiar} value={familiar}>
-                {familiar}
+            {animalCompanionOptions.map((animal) => (
+              <option key={animal} value={animal}>
+                {animal}
               </option>
             ))}
           </select>

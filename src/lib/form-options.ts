@@ -80,9 +80,7 @@ export const relicOptions = [
   "Surprise me",
 ] as const;
 
-export const cardFormOptions = ["Builder Familiar", "Maker Avatar"] as const;
-
-export const familiarOptions = [
+export const animalCompanionOptions = [
   "Surprise me",
   "Owl",
   "Fox",
