@@ -26,21 +26,27 @@ function StatBox(props: {
   accentColor: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div
+      className="relative flex min-w-[190px] flex-col items-center overflow-hidden rounded-[18px] border-[4px] bg-[#fffaf1] px-3 pt-3 pb-2 shadow-[0_8px_0_rgb(45_42_38_/_0.08)]"
+      style={{
+        borderColor: props.isHighlighted ? props.accentColor : "#d4cfc6",
+      }}
+    >
       <div
-        className="flex items-center gap-2 rounded-full border-[3px] bg-[#faf7f2] px-4 py-2"
+        className="absolute inset-x-0 top-0 h-[10px]"
         style={{
-          borderColor: props.isHighlighted ? props.accentColor : "#d4cfc6",
+          backgroundColor: props.isHighlighted ? props.accentColor : "#d4cfc6",
         }}
-      >
+      />
+      <div className="flex w-full items-center justify-center gap-3">
         <img
           src={STAT_ICONS[props.stat]}
           alt=""
-          className="size-10 object-contain"
+          className="size-12 object-contain"
           draggable={false}
         />
         <span
-          className="text-[36px] leading-none font-[850] tabular-nums"
+          className="text-[54px] leading-none font-[900] tabular-nums"
           style={{
             color: props.isHighlighted ? props.accentColor : "#2d2a26",
           }}
@@ -48,7 +54,7 @@ function StatBox(props: {
           {props.value}
         </span>
       </div>
-      <span className="text-[20px] font-bold tracking-[0.08em] text-[#2d2a26]/60 uppercase">
+      <span className="mt-1 text-[22px] leading-none font-[900] tracking-[0.1em] text-[#2d2a26]/60 uppercase">
         {STAT_LABELS[props.stat]}
       </span>
     </div>
@@ -112,9 +118,9 @@ export const HackaDeckCard = forwardRef<HTMLDivElement, HackaDeckCardProps>(
     );
     const title = clampText(spec.earned_title, 28);
     const teamName = clampText(spec.team_name, 20);
-    const moveName = clampText(spec.signature_move.name, 24);
-    const moveDescription = clampText(spec.signature_move.description, 80);
-    const fieldNote = clampText(spec.field_note, 60);
+    const moveName = clampText(spec.signature_move.name, 22);
+    const moveDescription = clampText(spec.signature_move.description, 88);
+    const fieldNote = clampText(spec.field_note, 76);
 
     const cardStyle: CSSProperties = {
       "--hd-accent": accentColor,
@@ -171,7 +177,7 @@ export const HackaDeckCard = forwardRef<HTMLDivElement, HackaDeckCardProps>(
         </header>
 
         {/* Art section */}
-        <section className="relative mx-[48px] flex-1 overflow-hidden rounded-[24px] border-[6px] border-[#c9b99a]">
+        <section className="relative mx-[48px] min-h-0 flex-1 overflow-hidden rounded-[24px] border-[6px] border-[#c9b99a]">
           <div
             className="absolute inset-0"
             style={{
@@ -196,7 +202,7 @@ export const HackaDeckCard = forwardRef<HTMLDivElement, HackaDeckCardProps>(
         </section>
 
         {/* Stats bar */}
-        <section className="flex items-center justify-center gap-6 px-[48px] py-[32px]">
+        <section className="grid grid-cols-4 gap-4 px-[48px] py-[28px]">
           {STAT_ORDER.map((stat) => (
             <StatBox
               key={stat}
@@ -209,26 +215,36 @@ export const HackaDeckCard = forwardRef<HTMLDivElement, HackaDeckCardProps>(
         </section>
 
         {/* Ability section */}
-        <section className="mx-[48px] mb-[24px] rounded-[16px] border-[4px] border-[#d4cfc6] bg-[#faf7f2] p-[28px]">
+        <section className="mx-[48px] mb-[24px] overflow-hidden rounded-[18px] border-[4px] border-[#d4cfc6] bg-[#fffaf1] shadow-[0_10px_0_rgb(45_42_38_/_0.08)]">
           {/* Move name banner */}
           <div
-            className="mx-auto w-fit rounded-lg px-8 py-3 text-center"
-            style={{ backgroundColor: accentColor }}
+            className="flex min-h-[82px] items-center justify-center px-10 text-center"
+            style={{
+              background: `linear-gradient(90deg, ${accentColor}, color-mix(in srgb, ${accentColor}, #ffffff 24%))`,
+            }}
           >
-            <span className="text-[28px] font-[850] tracking-wide text-white uppercase">
-              {moveName}
-            </span>
+            <TextSizer
+              text={moveName}
+              mediumAt={14}
+              longAt={18}
+              base="text-[40px]"
+              medium="text-[34px]"
+              long="text-[30px]"
+              className="leading-none font-[900] tracking-wide text-white uppercase"
+            />
           </div>
 
-          {/* Description */}
-          <p className="mt-4 text-center text-[26px] leading-[1.3] font-medium text-[#2d2a26]/80">
-            {moveDescription}
-          </p>
+          <div className="px-[34px] pt-[20px] pb-[24px]">
+            {/* Description */}
+            <p className="text-center text-[32px] leading-[1.18] font-[800] text-[#2d2a26]/85">
+              {moveDescription}
+            </p>
 
-          {/* Field note */}
-          <p className="mt-3 text-center text-[24px] leading-[1.3] font-medium text-[#2d2a26]/60 italic">
-            {fieldNote}
-          </p>
+            {/* Field note */}
+            <p className="mx-auto mt-3 max-w-[760px] border-t-[3px] border-[#d4cfc6] pt-3 text-center text-[27px] leading-[1.22] font-[750] text-[#2d2a26]/60 italic">
+              {fieldNote}
+            </p>
+          </div>
         </section>
 
         {/* Footer */}

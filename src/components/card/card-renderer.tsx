@@ -1,7 +1,7 @@
 "use client";
 
 import { Download } from "lucide-react";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { HackaDeckCardSpec } from "@/lib/card-schema";
@@ -40,12 +40,12 @@ export function CardRenderer({
 }: CardRendererProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [pendingExport, setPendingExport] = useState(false);
 
-  const performExport = useCallback(async () => {
+  async function downloadPng() {
     const node = cardRef.current;
-    if (!node) return;
+    if (!node || isExporting) return;
 
+    setIsExporting(true);
     try {
       const { toPng } = await import("html-to-image");
       const dataUrl = await toPng(node, {
@@ -55,6 +55,7 @@ export function CardRenderer({
         height: EXPORT_HEIGHT,
         canvasWidth: EXPORT_WIDTH,
         canvasHeight: EXPORT_HEIGHT,
+        style: { opacity: "1" },
       });
       const link = document.createElement("a");
       link.download = `hackadeck-card-${cardNumber}.png`;
@@ -62,20 +63,7 @@ export function CardRenderer({
       link.click();
     } finally {
       setIsExporting(false);
-      setPendingExport(false);
     }
-  }, [cardNumber]);
-
-  useEffect(() => {
-    if (isExporting && pendingExport) {
-      const timer = setTimeout(performExport, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isExporting, pendingExport, performExport]);
-
-  function downloadPng() {
-    setIsExporting(true);
-    setPendingExport(true);
   }
 
   return (
@@ -121,8 +109,8 @@ export function CardRenderer({
           backgroundColor: "#e8e2d8",
           borderRadius: Math.round(24 / PREVIEW_SCALE),
           pointerEvents: "none",
-          opacity: isExporting ? 1 : 0,
-          zIndex: isExporting ? -1 : -9999,
+          opacity: 0,
+          zIndex: -9999,
         }}
       >
         <div
