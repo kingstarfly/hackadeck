@@ -146,6 +146,45 @@ export const getParticipantDeck = query({
   },
 });
 
+export const findParticipantDeck = query({
+  args: {
+    eventSlug: v.string(),
+    recoveryEmail: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const eventSlug = args.eventSlug.trim();
+    const recoveryEmail = args.recoveryEmail.trim().toLowerCase();
+
+    if (!eventSlug || !recoveryEmail) {
+      return null;
+    }
+
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q) => q.eq("slug", eventSlug))
+      .unique();
+    if (!event) {
+      return null;
+    }
+
+    const participant = await ctx.db
+      .query("participants")
+      .withIndex("by_event_and_recovery_email", (q) =>
+        q.eq("eventId", event._id).eq("recoveryEmail", recoveryEmail),
+      )
+      .unique();
+    if (!participant) {
+      return null;
+    }
+
+    return {
+      eventSlug: event.slug,
+      participantId: participant._id,
+      deckPath: `/events/${event.slug}/deck/${participant._id}`,
+    };
+  },
+});
+
 export const selectCard = mutation({
   args: {
     eventSlug: v.string(),

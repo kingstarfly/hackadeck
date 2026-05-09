@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Sparkles } from "lucide-react";
 
 import { HackaDeckForm } from "@/components/hackadeck-form";
+import { RecoveryDeckLookup } from "@/components/recovery-deck-lookup";
 
 export default function Home() {
   return (
@@ -28,6 +29,7 @@ export default function Home() {
       </section>
 
       <Suspense>
+        <RecoveryDeckLookup />
         <HackaDeckForm />
       </Suspense>
     </main>

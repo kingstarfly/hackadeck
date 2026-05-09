@@ -178,6 +178,45 @@ async function seedParticipantDeck(
 }
 
 describe("participant deck", () => {
+  it("finds a participant deck by event slug and normalized recovery email", async () => {
+    const t = convexTest(schema, modules);
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    const deckIds = await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+
+    const result = await t.query(api.deck.findParticipantDeck, {
+      eventSlug: "ai-engineer-hack-2026",
+      recoveryEmail: " Maya@Example.com ",
+    });
+
+    expect(result).toEqual({
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+      deckPath: `/events/ai-engineer-hack-2026/deck/${deckIds.participantId}`,
+    });
+  });
+
+  it("does not recover a deck from a different event", async () => {
+    const t = convexTest(schema, modules);
+    await seedEvent(t, "other-event");
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+
+    const result = await t.query(api.deck.findParticipantDeck, {
+      eventSlug: "other-event",
+      recoveryEmail: "maya@example.com",
+    });
+
+    expect(result).toBeNull();
+  });
+
   it("returns cards newest first with looks for the scoped event participant", async () => {
     const t = convexTest(schema, modules);
     const eventId = await seedEvent(t, "ai-engineer-hack-2026");
