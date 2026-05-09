@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, QrCode, Sparkles } from "lucide-react";
 import { useQuery } from "convex/react";
+import { formatDistanceToNow } from "date-fns";
 
 import { api } from "../../../convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,6 @@ import { HackaDeckCard } from "@/components/card/hackadeck-card";
 import type { HackaDeckCardSpec } from "@/lib/card-schema";
 
 const GALLERY_LIMIT = 72;
-const JUST_HATCHED_MS = 10_000;
 
 function buildersLabel(count: number) {
   return `${count} ${count === 1 ? "builder" : "builders"} hatched`;
@@ -25,10 +25,10 @@ const CARD_HEIGHT = 1536;
 
 function ScaledGalleryCard({
   children,
-  isJustHatched,
+  createdAt,
 }: {
   children: React.ReactNode;
-  isJustHatched: boolean;
+  createdAt: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
@@ -48,30 +48,29 @@ function ScaledGalleryCard({
   }, []);
 
   return (
-    <article
-      ref={containerRef}
-      className="relative overflow-hidden"
-      style={{ aspectRatio: `${CARD_WIDTH}/${CARD_HEIGHT}` }}
-      data-just-hatched={isJustHatched ? "true" : undefined}
-    >
-      {isJustHatched ? (
-        <div className="bg-foreground text-background absolute top-2 right-2 z-10 px-2 py-1 text-xs font-semibold tracking-wide uppercase">
-          Just hatched
-        </div>
-      ) : null}
-      {scale > 0 ? (
-        <div
-          className="origin-top-left"
-          style={{
-            width: CARD_WIDTH,
-            height: CARD_HEIGHT,
-            transform: `scale(${scale})`,
-          }}
-        >
-          {children}
-        </div>
-      ) : null}
-    </article>
+    <div>
+      <article
+        ref={containerRef}
+        className="relative overflow-hidden"
+        style={{ aspectRatio: `${CARD_WIDTH}/${CARD_HEIGHT}` }}
+      >
+        {scale > 0 ? (
+          <div
+            className="origin-top-left"
+            style={{
+              width: CARD_WIDTH,
+              height: CARD_HEIGHT,
+              transform: `scale(${scale})`,
+            }}
+          >
+            {children}
+          </div>
+        ) : null}
+      </article>
+      <p className="text-foreground/70 mt-2 text-right text-xs">
+        {formatDistanceToNow(createdAt, { addSuffix: true })}
+      </p>
+    </div>
   );
 }
 
@@ -81,47 +80,10 @@ export function EventGalleryWall({ slug }: { slug: string }) {
     limit: GALLERY_LIMIT,
   });
   const [origin, setOrigin] = useState("");
-  const seenCardIds = useRef<Set<string>>(new Set());
-  const [highlightedIds, setHighlightedIds] = useState<Set<string>>(
-    () => new Set(),
-  );
 
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
-
-  useEffect(() => {
-    if (!gallery) {
-      return;
-    }
-
-    const nextHighlights = new Set<string>();
-    for (const card of gallery.cards) {
-      if (!seenCardIds.current.has(card._id)) {
-        if (seenCardIds.current.size > 0) {
-          nextHighlights.add(card._id);
-        }
-        seenCardIds.current.add(card._id);
-      }
-    }
-
-    if (nextHighlights.size === 0) {
-      return;
-    }
-
-    setHighlightedIds((current) => new Set([...current, ...nextHighlights]));
-    const timeout = window.setTimeout(() => {
-      setHighlightedIds((current) => {
-        const next = new Set(current);
-        for (const id of nextHighlights) {
-          next.delete(id);
-        }
-        return next;
-      });
-    }, JUST_HATCHED_MS);
-
-    return () => window.clearTimeout(timeout);
-  }, [gallery]);
 
   const hatchUrl = useMemo(() => {
     const path = `/?event=${encodeURIComponent(slug)}`;
@@ -225,12 +187,9 @@ export function EventGalleryWall({ slug }: { slug: string }) {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {gallery.cards.map((card) => (
-              <ScaledGalleryCard
-                key={card._id}
-                isJustHatched={highlightedIds.has(card._id)}
-              >
+              <ScaledGalleryCard key={card._id} createdAt={card.createdAt}>
                 <HackaDeckCard
                   spec={card.spec as HackaDeckCardSpec}
                   imageUrl={card.avatarImageUrl}

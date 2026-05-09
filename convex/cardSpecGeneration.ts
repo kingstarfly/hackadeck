@@ -11,6 +11,7 @@ import {
   buildCardSpecUserPrompt,
   cardSpecSchema,
   normalizeGeneratedSpec,
+  rollRarity,
   type NormalizedCardSpec,
 } from "./cardSpecCore";
 
@@ -70,8 +71,10 @@ export const generateForRun = internalAction({
         throw new Error("The model did not return a valid card spec.");
       }
 
+      const rarity = rollRarity();
       const spec: NormalizedCardSpec = normalizeGeneratedSpec(
         cardSpecSchema.parse(parsed),
+        rarity,
       );
 
       await ctx.runMutation(internal.cardSpecState.completeSpecGeneration, {

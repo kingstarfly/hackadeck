@@ -1,5 +1,31 @@
 import { z } from "zod";
 
+export const RARITY_TIERS = [
+  "Common",
+  "Uncommon",
+  "Rare",
+  "Epic",
+  "Legendary",
+] as const;
+
+export type Rarity = (typeof RARITY_TIERS)[number];
+
+const RARITY_THRESHOLDS: { rarity: Rarity; cumulative: number }[] = [
+  { rarity: "Common", cumulative: 0.5 }, // 50%
+  { rarity: "Uncommon", cumulative: 0.8 }, // 30%
+  { rarity: "Rare", cumulative: 0.93 }, // 13%
+  { rarity: "Epic", cumulative: 0.98 }, // 5%
+  { rarity: "Legendary", cumulative: 1.0 }, // 2%
+];
+
+export function rollRarity(): Rarity {
+  const roll = Math.random();
+  for (const { rarity, cumulative } of RARITY_THRESHOLDS) {
+    if (roll < cumulative) return rarity;
+  }
+  return "Common"; // fallback
+}
+
 export const cardSpecSchema = z.object({
   display_name: z.string().min(1).max(24),
   team_name: z.string().max(40).nullable().optional(),
@@ -16,7 +42,6 @@ export const cardSpecSchema = z.object({
     visual: z.string().min(1).max(180),
     meaning: z.string().min(1).max(120),
   }),
-  rarity: z.enum(["Common", "Uncommon", "Rare", "Epic", "Legendary"]),
   print_finish: z.enum(["Matte", "Stamped", "Spot Gloss", "Metallic Ink"]),
   stats: z.object({
     Build: z.number().int().min(40).max(99),
@@ -49,7 +74,9 @@ type NullToUndefined<T> = T extends null ? undefined : T;
 type NormalizeNulls<T> = {
   [K in keyof T]: NullToUndefined<T[K]>;
 };
-export type NormalizedCardSpec = NormalizeNulls<CardSpec>;
+type NormalizedLLMSpec = NormalizeNulls<CardSpec>;
+
+export type NormalizedCardSpec = NormalizedLLMSpec & { rarity: Rarity };
 
 export type FormAnswersForSpec = {
   eventSlug: string;
@@ -142,9 +169,13 @@ SECTION 6: CONSTRAINTS
 "No text, no letters, no numbers, no logos, no trademarks, no watermark, no 3D rendering, no product photography, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, no high contrast, no literal screens or browser windows."`;
 }
 
-export function normalizeGeneratedSpec(spec: CardSpec): NormalizedCardSpec {
+export function normalizeGeneratedSpec(
+  spec: CardSpec,
+  rarity: Rarity,
+): NormalizedCardSpec {
   return {
     ...spec,
+    rarity,
     team_name: spec.team_name ?? undefined,
     card_number: spec.card_number ?? undefined,
     hatched_at_label: spec.hatched_at_label ?? undefined,
