@@ -5,7 +5,14 @@ HackaDeck is a live hackathon collectible-card experience where participants ans
 ## Language
 
 **Participant**:
-A hackathon attendee who submits quiz answers to generate a card.
+A hackathon attendee within an event who submits quiz answers to generate a card.
+
+**Event**:
+A hackathon or live gathering that owns its participant decks, cards, looks, and public event page.
+_Avoid_: global gallery
+
+**Event Slug**:
+A stable URL-safe identifier for an event, such as `ai-engineer-hack-2026`.
 
 **Builder Familiar**:
 An animal companion card persona generated from a participant's hackathon role, energy, powers, weakness, relic, and tiny detail.
@@ -26,19 +33,26 @@ _Avoid_: art variant
 A required, unverified email string used as a lightweight recovery key for generated assets.
 _Avoid_: account email, login, verified identity
 
-**Gallery**:
-The live public wall of cards whose participants consented to public display.
+**Participant Deck**:
+The event-scoped management page where a participant can view previous cards, choose the selected card/look, download assets, and start another card.
+
+**Event Page**:
+The public page for one event, including the live gallery wall and any event-level deck views or highlights.
 
 ## Relationships
 
-- A **Participant** can create one or more **Card Runs**.
+- An **Event** has one or more **Participants**.
+- A **Participant** belongs to exactly one **Event**.
+- An **Event** has one **Event Page**.
+- A **Participant** can create one or more **Card Runs** within that **Event**.
 - A **Card Run** produces at most one **Card**.
 - A **Card** belongs to exactly one **Participant**.
 - A **Card** has one or more **Looks**.
+- A **Participant** has one **Participant Deck**.
 - A **Participant** chooses one **Card** as their selected card.
 - A **Card** chooses one **Look** as its selected look.
-- A selected **Card** appears in the **Gallery** only when the **Participant** consents to public display.
-- A **Recovery email** can help find a **Participant**'s generated assets but does not prove ownership.
+- A selected **Card** appears on the **Event Page** only when the **Participant** consents to public display.
+- A **Recovery email** can help find a **Participant**'s generated assets for an **Event** but does not prove ownership.
 
 ## Example Dialogue
 

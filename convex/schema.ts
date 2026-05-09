@@ -44,16 +44,39 @@ const cardSpec = v.object({
 });
 
 export default defineSchema({
+  events: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    startsAt: v.number(),
+    endsAt: v.optional(v.number()),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_active_and_starts_at", ["isActive", "startsAt"]),
+
+  eventCounters: defineTable({
+    eventId: v.id("events"),
+    nextCardNumber: v.number(),
+    updatedAt: v.number(),
+  }).index("by_event", ["eventId"]),
+
   participants: defineTable({
-    email: v.string(),
+    eventId: v.id("events"),
+    recoveryEmail: v.string(),
     displayName: v.string(),
     teamName: v.optional(v.string()),
     consentGallery: v.boolean(),
+    selectedCardId: v.optional(v.id("cards")),
     createdAt: v.number(),
-  }).index("by_email", ["email"]),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_event_and_recovery_email", ["eventId", "recoveryEmail"]),
 
   cardRuns: defineTable({
+    eventId: v.id("events"),
     participantId: v.id("participants"),
+    cardNumber: v.optional(v.number()),
     status: v.union(
       v.literal("queued"),
       v.literal("spec_generating"),
@@ -63,15 +86,20 @@ export default defineSchema({
       v.literal("error"),
     ),
     formAnswers: v.any(),
+    cardId: v.optional(v.id("cards")),
     errorMessage: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_participant", ["participantId"]),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_participant", ["participantId"]),
 
   cards: defineTable({
+    eventId: v.id("events"),
     participantId: v.id("participants"),
     runId: v.id("cardRuns"),
     cardNumber: v.number(),
+    selectedLookId: v.optional(v.id("looks")),
     spec: cardSpec,
     avatarImageUrl: v.string(),
     finalPngUrl: v.optional(v.string()),
@@ -79,13 +107,31 @@ export default defineSchema({
     isPublic: v.boolean(),
     createdAt: v.number(),
   })
+    .index("by_event", ["eventId"])
     .index("by_participant", ["participantId"])
-    .index("by_public_created", ["isPublic", "createdAt"]),
+    .index("by_event_and_public_created", ["eventId", "isPublic", "createdAt"]),
+
+  looks: defineTable({
+    eventId: v.id("events"),
+    cardId: v.id("cards"),
+    runId: v.id("cardRuns"),
+    lookNumber: v.number(),
+    reason: v.union(v.literal("initial"), v.literal("art_reroll")),
+    specSnapshot: cardSpec,
+    avatarImageUrl: v.string(),
+    finalPngUrl: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_card", ["cardId"])
+    .index("by_card_and_look_number", ["cardId", "lookNumber"]),
 
   teams: defineTable({
+    eventId: v.id("events"),
     teamName: v.string(),
     memberParticipantIds: v.array(v.id("participants")),
     teamCardId: v.optional(v.id("cards")),
     createdAt: v.number(),
-  }).index("by_team_name", ["teamName"]),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_event_and_team_name", ["eventId", "teamName"]),
 });

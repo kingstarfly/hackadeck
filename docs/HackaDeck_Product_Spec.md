@@ -217,7 +217,7 @@ Future manual idea:
 5. App creates a structured card spec with GPT-5.5.
 6. App generates central familiar art with GPT Image 2.
 7. App renders final card PNG deterministically.
-8. User sees result page.
+8. User lands on their participant deck page.
 9. User can download PNG, create another look, pick their favorite card/look,
    or view gallery.
 10. Card appears on live gallery wall if consented.
@@ -587,7 +587,8 @@ type HackaDeckCardSpec = {
 - Titles should be short and punchy.
 - Prefer ordinary animals with one clever coding twist.
 - One meaningful personal relic is better than many generic props.
-- Do not crowd the card with lore; save extra copy for the detail page or future manual.
+- Do not crowd the card with lore; save extra copy for the deck page or future
+  manual.
 
 ### Example spec
 
@@ -915,11 +916,48 @@ Store generated art and final PNG URLs. Options:
 
 ## 17. Data model
 
+### `events`
+
+```ts
+{
+  _id: Id<"events">;
+  name: string;
+  slug: string; // e.g. "ai-engineer-hack-2026"
+  startsAt: number;
+  endsAt?: number;
+  isActive: boolean;
+  createdAt: number;
+}
+```
+
+An event is the top-level container for participant decks, cards, looks, and the
+public event page. Card numbers are scoped to an event.
+
+Event details are populated by the team, not participants. MVP can use a seed
+script or direct admin/database edit for the current hackathon event. A minimal
+admin page for creating/editing events is useful only if time allows.
+
+### `eventCounters`
+
+```ts
+{
+  _id: Id<"eventCounters">;
+  eventId: Id<"events">;
+  nextCardNumber: number;
+  updatedAt: number;
+}
+```
+
+Use an event-scoped counter to assign card numbers safely. Assign the card
+number when the card run is created, so in-progress generation can say
+`Card #024 is hatching`.
+
 ### `participants`
 
 ```ts
 {
   _id: Id<"participants">;
+  eventId: Id<"events">;
   recoveryEmail: string;
   displayName: string;
   teamName?: string;
@@ -929,11 +967,18 @@ Store generated art and final PNG URLs. Options:
 }
 ```
 
+A participant is the lightweight owner record for a recovery email within an
+event. On first submission for an event, create the participant. On later
+submissions with the same normalized recovery email for the same event, reuse
+the participant, update display/team fields from the latest non-empty values,
+and show their existing cards on the deck page.
+
 ### `cardRuns`
 
 ```ts
 {
   _id: Id<"cardRuns">;
+  eventId: Id<"events">;
   participantId: Id<"participants">;
   cardNumber: number;
   status: "queued" | "spec_generating" | "art_generating" | "rendering" | "done" | "error";
@@ -954,6 +999,7 @@ same recovery email instead of mutating previous answers.
 ```ts
 {
   _id: Id<"cards">;
+  eventId: Id<"events">;
   participantId: Id<"participants">;
   runId: Id<"cardRuns">;
   cardNumber: number;
@@ -967,14 +1013,15 @@ same recovery email instead of mutating previous answers.
 }
 ```
 
-The `cards` row stores the currently selected art and PNG for fast result page
-and gallery reads. The historical generated assets live in `looks`.
+The `cards` row stores the currently selected art and PNG for fast deck and
+gallery reads. The historical generated assets live in `looks`.
 
 ### `looks`
 
 ```ts
 {
   _id: Id<"looks">;
+  eventId: Id<"events">;
   cardId: Id<"cards">;
   runId: Id<"cardRuns">;
   lookNumber: number;
@@ -986,7 +1033,7 @@ and gallery reads. The historical generated assets live in `looks`.
 }
 ```
 
-A look is a generated visual output for the same card identity. The result page
+A look is a generated visual output for the same card identity. The deck page
 can show an art picker inside the selected card.
 
 ### `teams`
@@ -994,6 +1041,7 @@ can show an art picker inside the selected card.
 ```ts
 {
   _id: Id<"teams">;
+  eventId: Id<"events">;
   teamName: string;
   memberParticipantIds: Id<"participants">[];
   teamCardId?: Id<"cards">;
@@ -1007,27 +1055,92 @@ can show an art picker inside the selected card.
 
 | Route | Purpose |
 |---|---|
-| `/` | QR landing page / quiz |
-| `/card/[id]` | Result page and PNG download |
-| `/gallery` | Live public gallery wall |
-| `/manual` | Optional icon / rarity / familiar reference manual |
-| `/admin` | Optional: force regenerate, hide card, view errors |
+| `/` | QR landing page / quiz, with event selector and recovery email |
+| `/events/[slug]` | Public event page with gallery wall and event-level highlights |
+| `/events/[slug]/deck/[participantId]` | Primary participant result and management page for previous cards, looks, selected event card, and starting another card |
+| `/events/[slug]/recover` | Find a participant deck by recovery email for one event |
+| `/events/[slug]/manual` | Optional icon / rarity / familiar reference manual |
+| `/admin` | Optional: create/edit events, force regenerate, hide card, view errors |
+
+### Event selection
+
+The quiz includes an event selector. Default to the most recent active event
+when only one likely event exists.
+
+Selector options should be limited to recently active events to reduce wrong
+event selection:
+
+- Show events where `isActive` is true.
+- Also show events that started within the last 24 hours.
+- Display event name and start time, not just slug.
+
+QR codes for an event should deep-link with the slug preselected when possible.
+
+### Event page
+
+The event page is the public artifact for one event. It replaces a generic
+global gallery wall.
+
+Minimum viable event page:
+
+- Event name
+- QR/link to hatch a card for that event
+- Live gallery wall of selected public cards
+- Count: `23 builders hatched`
+- Cards sorted newest first by card creation timestamp
+- Big-screen friendly layout
+
+Cut from MVP:
+
+- Team filters
+- Rarity filters
+- Manual sorting controls
+- Dedicated card/look detail pages
+
+### Participant deck page
+
+The participant deck page is the primary participant-facing result and
+management page for one recovery email within one event. MVP does not need a
+separate card or look detail page.
+
+It should show:
+
+- Selected card at the top
+- Previous cards, newest first
+- Status of in-progress card runs
+- Looks for the selected card
+- Collapsible quiz answers for each card
+- Actions: `Use this card`, `Try another look`, `Use this look`, `Download PNG`,
+  `Start another card`, `View gallery`
+
+The deck page is not treated as secure account management. It is a convenient
+place to recover generated cards and assets for the event.
+
+UX rule:
+
+- A card comes from one quiz submission and has one set of quiz answers.
+- A look is the same answers and card identity with different generated art.
+- Do not show the word "run" to participants; show in-progress or failed card
+  runs as card status rows like `Hatching a new card...` or
+  `Card failed to hatch. Retry`.
 
 ---
 
 ## 19. Generation lifecycle
 
 1. Create participant record.
-2. Create card run with `queued` status.
-3. Start Convex action: `generateCardSpec`.
-4. Save spec and set status `art_generating`.
-5. Start image generation from `spec.art_prompt`.
-6. Save avatar image URL.
-7. Render final PNG.
-8. Save card record and initial look.
-9. Auto-select the newly completed card for the participant.
-10. Set card run status `done`.
-11. Gallery query updates live.
+2. Reuse an existing participant when normalized recovery email and event match.
+3. Increment the event counter and assign the next card number.
+4. Create card run with `queued` status and assigned card number.
+5. Start Convex action: `generateCardSpec`.
+6. Save spec and set status `art_generating`.
+7. Start image generation from `spec.art_prompt`.
+8. Save avatar image URL.
+9. Render final PNG.
+10. Save card record and initial look.
+11. Auto-select the newly completed card for the participant.
+12. Set card run status `done`.
+13. Event page gallery query updates live.
 
 ### Failure handling
 
@@ -1049,7 +1162,7 @@ If PNG rendering fails:
 
 ### Start New Card
 
-- User can start over from the quiz from the result page.
+- User can start over from the quiz from the deck page.
 - A new card keeps the same recovery email and can reuse display/team defaults.
 - A completed card appears in the result-page card selector.
 - A newly completed card is automatically selected as the participant's current
@@ -1121,14 +1234,12 @@ Minimum viable gallery:
 
 - Grid of public cards
 - Auto-updates when new cards finish
-- Click card to open detail page
+- Click card to focus or highlight it in the gallery
 - Show count: “23 builders hatched”
 - Show one selected card per participant/recovery email
 
-Good gallery details:
+Good event page details:
 
-- Filter by team
-- Sort newest first
 - Big-screen mode
 - Hide private cards
 - Highlight recent card with a small “just hatched” state
