@@ -1,0 +1,29 @@
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">HackaDeck mascot logo</title>
+  <desc id="desc">A warm collectible card mark with a small Builder Familiar mascot holding a pencil relic.</desc>
+  <rect width="640" height="640" fill="#EDEAE6"/>
+  <g transform="translate(118 70)">
+    <rect x="36" y="0" width="332" height="500" rx="28" fill="#FAF7F2" stroke="#2D2A26" stroke-width="12"/>
+    <rect x="64" y="30" width="276" height="74" rx="16" fill="#E8E4E0"/>
+    <path d="M86 67H224" stroke="#2D2A26" stroke-width="12" stroke-linecap="round"/>
+    <path d="M86 128H318" stroke="#DAD6D0" stroke-width="10" stroke-linecap="round"/>
+    <rect x="64" y="148" width="276" height="232" rx="26" fill="#F2D5BE" stroke="#2D2A26" stroke-width="8"/>
+    <rect x="84" y="402" width="72" height="28" rx="14" fill="#E8E4E0"/>
+    <rect x="166" y="402" width="72" height="28" rx="14" fill="#E8E4E0"/>
+    <rect x="248" y="402" width="72" height="28" rx="14" fill="#E8E4E0"/>
+    <path d="M86 457H318" stroke="#DAD6D0" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(215 202)">
+    <path d="M104 42C60 42 28 77 28 125C28 184 68 226 128 226C188 226 228 184 228 125C228 77 196 42 152 42C142 24 135 15 128 15C121 15 114 24 104 42Z" fill="#BFD2BC" stroke="#2D2A26" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M84 120C84 111 90 105 99 105C108 105 114 111 114 120" stroke="#2D2A26" stroke-width="9" stroke-linecap="round"/>
+    <path d="M142 120C142 111 148 105 157 105C166 105 172 111 172 120" stroke="#2D2A26" stroke-width="9" stroke-linecap="round"/>
+    <path d="M118 151C124 156 132 156 138 151" stroke="#2D2A26" stroke-width="8" stroke-linecap="round"/>
+    <path d="M70 169C84 185 103 194 128 194C153 194 172 185 186 169" stroke="#8DA986" stroke-width="8" stroke-linecap="round"/>
+    <path d="M43 83C26 90 14 105 10 126" stroke="#2D2A26" stroke-width="9" stroke-linecap="round"/>
+    <path d="M213 83C230 90 242 105 246 126" stroke="#2D2A26" stroke-width="9" stroke-linecap="round"/>
+    <rect x="177" y="152" width="22" height="96" rx="11" transform="rotate(-35 177 152)" fill="#D99058" stroke="#2D2A26" stroke-width="7"/>
+    <path d="M172 147L191 134L190 159L172 147Z" fill="#FAF7F2" stroke="#2D2A26" stroke-width="7" stroke-linejoin="round"/>
+  </g>
+  <path d="M141 570H499" stroke="#2D2A26" stroke-width="12" stroke-linecap="round"/>
+  <path d="M184 604H456" stroke="#6F6658" stroke-width="10" stroke-linecap="round"/>
+</svg>

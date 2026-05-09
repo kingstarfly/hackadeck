@@ -31,6 +31,29 @@ const STATUS_COPY = {
   error: "The familiar matcher got tangled.",
 } as const;
 
+const STAT_ICONS = [
+  {
+    label: "Build",
+    src: "/stat-icons/build.png",
+    note: "Making the tiny frame shipshape.",
+  },
+  {
+    label: "Debug",
+    src: "/stat-icons/debug.png",
+    note: "Checking the familiar's edge cases.",
+  },
+  {
+    label: "Taste",
+    src: "/stat-icons/taste.png",
+    note: "Polishing the matte paper finish.",
+  },
+  {
+    label: "Chaos",
+    src: "/stat-icons/chaos.png",
+    note: "Measuring the delightful curveballs.",
+  },
+] as const;
+
 function statusProgress(status: keyof typeof STATUS_COPY) {
   switch (status) {
     case "queued":
@@ -73,6 +96,7 @@ export function ParticipantDeckStatus(props: {
   const selectLook = useMutation(api.deck.selectLook);
   const requestArtReroll = useMutation(api.deck.requestArtReroll);
   const [previewLookId, setPreviewLookId] = useState<Id<"looks"> | null>(null);
+  const [activeIconIndex, setActiveIconIndex] = useState(0);
 
   const activeRun = deck?.runs.find((run) =>
     ["queued", "spec_generating", "art_generating", "rendering"].includes(
@@ -116,6 +140,18 @@ export function ParticipantDeckStatus(props: {
     setPreviewLookId(null);
   }, [selectedCard?._id, selectedCard?.selectedLookId]);
 
+  useEffect(() => {
+    if (!activeRun) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setActiveIconIndex((index) => (index + 1) % STAT_ICONS.length);
+    }, 1800);
+
+    return () => window.clearInterval(interval);
+  }, [activeRun]);
+
   if (deck === undefined) {
     return (
       <div className="border-border bg-card mt-8 space-y-4 border p-5">
@@ -146,6 +182,74 @@ export function ParticipantDeckStatus(props: {
     `/?event=${deck.event.slug}&recoveryEmail=${encodeURIComponent(
       deck.participant.recoveryEmail,
     )}` as Route;
+  const activeIcon = STAT_ICONS[activeIconIndex];
+
+  if (activeRun && !selectedCard) {
+    return (
+      <section className="min-h-[calc(100vh-14rem)] py-8">
+        <div className="grid min-h-[calc(100vh-18rem)] gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+          <div className="border-border bg-card flex min-h-[28rem] flex-col items-center justify-center border p-6 text-center sm:min-h-[34rem] sm:p-10">
+            <div className="text-foreground/60 flex items-center gap-2 text-sm font-medium">
+              <LoaderCircle
+                aria-hidden="true"
+                className="size-4 animate-spin"
+              />
+              Card #{activeRun.cardNumber} is hatching
+            </div>
+
+            <div className="mt-8 flex w-full max-w-md flex-1 items-center justify-center">
+              <div className="border-border bg-background relative aspect-square w-full max-w-[22rem] overflow-hidden border p-6">
+                <img
+                  key={activeIcon.src}
+                  src={activeIcon.src}
+                  alt=""
+                  className="animate-in fade-in zoom-in-95 h-full w-full object-contain duration-500"
+                />
+              </div>
+            </div>
+
+            <p className="text-foreground/50 mt-8 text-sm font-semibold tracking-wide uppercase">
+              {activeIcon.label}
+            </p>
+            <h2 className="text-foreground mt-2 text-3xl font-light tracking-tight sm:text-5xl">
+              {activeCopy}
+            </h2>
+            <p className="text-foreground/70 mt-4 max-w-[44ch] text-base leading-relaxed">
+              {activeIcon.note}
+            </p>
+
+            <Progress
+              value={statusProgress(activeRun.status)}
+              className="bg-border mt-8 h-2 w-full max-w-xl"
+            />
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 lg:grid-cols-1">
+            {STAT_ICONS.map((icon, index) => {
+              const isActive = index === activeIconIndex;
+
+              return (
+                <div
+                  key={icon.label}
+                  className={cn(
+                    "bg-card border p-2 transition sm:p-3",
+                    isActive ? "border-foreground" : "border-border opacity-55",
+                  )}
+                >
+                  <span className="sr-only">{icon.label}</span>
+                  <img
+                    src={icon.src}
+                    alt=""
+                    className="aspect-square w-full object-contain"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-8 space-y-8">
@@ -176,8 +280,8 @@ export function ParticipantDeckStatus(props: {
       ) : null}
 
       {selectedCard ? (
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_1fr]">
-          <div>
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <div className="w-full shrink-0 pr-10 lg:w-[420px]">
             <CardRenderer
               spec={selectedCard.spec}
               imageUrl={
@@ -190,7 +294,7 @@ export function ParticipantDeckStatus(props: {
             />
           </div>
 
-          <div className="space-y-6">
+          <div className="min-w-0 flex-1 space-y-6">
             <div>
               <p className="text-foreground/50 text-sm font-semibold tracking-wide uppercase">
                 Selected card

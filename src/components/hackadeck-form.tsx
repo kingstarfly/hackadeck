@@ -1,7 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Check, WandSparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  CircleHelp,
+  Gem,
+  Mail,
+  Palette,
+  Sparkles,
+  WandSparkles,
+  Zap,
+} from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Route } from "next";
@@ -20,6 +30,165 @@ import { formAnswerSchema } from "@/lib/card-schema";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "hackadeck-form-draft";
+
+const detailExamples = [
+  "I always have 40 tabs open.",
+  "I keep saying the CSS is almost done.",
+  "I brought three chargers and no water bottle.",
+  "I name variables dramatically.",
+  "I keep asking if we need auth.",
+  "I explain bugs with tiny diagrams.",
+] as const;
+
+const roleHints: Record<string, string> = {
+  "Frontend builder": "Makes the thing feel real.",
+  "Backend builder": "Keeps the hidden machinery humming.",
+  "Full-stack chaos agent": "Jumps layers without blinking.",
+  "Designer / UI polish": "Finds the part that feels off.",
+  "Prompt wrangler": "Negotiates with the model until it behaves.",
+  "Data / evals person": "Turns vibes into evidence.",
+  "Demo / pitch lead": "Makes the story land.",
+  "Product / scope keeper": "Protects the sharp version.",
+  "Infra / deployment fixer": "Gets it alive in public.",
+  "I am doing everything somehow": "Carries the whole tiny universe.",
+};
+
+const intentHints: Record<string, string> = {
+  "My actual role today": "A faithful builder portrait.",
+  "My chaotic inner builder": "The truest version, emotionally.",
+  "My team energy": "Your place in the group spell.",
+  "My secret superpower": "Make the hidden strength visible.",
+  "Surprise me, but be kind": "Let HackaDeck choose the flattering read.",
+};
+
+const energyHints: Record<string, string> = {
+  "Calm shipper": "Quietly gets it done.",
+  "Deadline gremlin": "Turns pressure into motion.",
+  "Pixel perfectionist": "Notices the two pixels.",
+  "Bug hunter": "Follows the weird trail.",
+  "Idea fountain": "Always has another angle.",
+  "Team therapist": "Keeps the room breathing.",
+  "Quiet optimizer": "Makes everything smoother.",
+  "Demo magician": "Somehow makes it work on stage.",
+  "Shortcut goblin": "Finds the tiny trapdoor.",
+  "Last-minute philosopher": "Asks the real question at 4:48.",
+};
+
+const weaknessHints: Record<string, string> = {
+  "Too many tabs": "Browser archaeology.",
+  "Scope creep magnet": "Every idea has potential.",
+  "CSS betrayal": "The layout had other plans.",
+  "Merge conflict aura": "Git knows your name.",
+  "Forgot to eat": "Fueled by momentum.",
+  "Over-polishes buttons": "One more hover state.",
+  "Names variables dramatically": "Every const has lore.",
+  'Says "one quick refactor"': "Famously dangerous words.",
+  "Trusts the API docs too much": "Optimism with headers.",
+  "Demo gremlin attractor": "The laptop senses fear.",
+  "Keeps changing the prompt": "Almost there, one more wording.",
+  "Needs one more coffee": "The classic power source.",
+};
+
+const relicHints: Record<string, string> = {
+  "Coffee cup": "The build potion.",
+  "Rubber duck": "Small debugging witness.",
+  Headphones: "Focus shield enabled.",
+  "Sticky notes": "Thoughts with adhesive.",
+  "Cable mess": "A nest of possibilities.",
+  Hoodie: "Portable comfort mode.",
+  Snacks: "Emergency morale.",
+  "Tiny plant": "Desk-level optimism.",
+  "Whiteboard marker": "Plans become visible.",
+  "Lucky keyboard key": "Tiny talisman.",
+  "Terminal lantern": "Guides the late-night path.",
+  "Surprise me": "Let the card pick the prop.",
+};
+
+const animalHints: Record<string, string> = {
+  "Surprise me": "Best match from your answers.",
+  Owl: "Patient, watchful, precise.",
+  Fox: "Clever shortcuts and product sense.",
+  Raccoon: "Resourceful late-night problem solving.",
+  Capybara: "Unbothered team comfort.",
+  Otter: "Playful, fast, curious.",
+  Crow: "Finds shiny useful things.",
+  Cat: "Selective focus, strong opinions.",
+  Turtle: "Steady progress, durable calm.",
+  Dog: "Loyal momentum and demo energy.",
+  Moth: "Drawn to the glowing screen.",
+};
+
+function FieldText({
+  eyebrow,
+  title,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold tracking-[0.18em] text-[#8d5f3a] uppercase">
+        {eyebrow}
+      </p>
+      <h2 className="text-2xl font-light tracking-tight text-[#23201b]">
+        {title}
+      </h2>
+      {children ? (
+        <p className="max-w-[60ch] text-sm leading-6 text-[#6f6658]">
+          {children}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function TileRadioGroup({
+  name,
+  options,
+  defaultValue,
+  columns = "sm:grid-cols-2",
+  hints = {},
+}: {
+  name: string;
+  options: readonly string[];
+  defaultValue?: string;
+  columns?: string;
+  hints?: Record<string, string>;
+}) {
+  return (
+    <div className={cn("grid gap-3", columns)}>
+      {options.map((option) => (
+        <label
+          key={option}
+          className="group relative min-h-[96px] cursor-pointer rounded-md border border-[#d8ccb9] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#8d5f3a]/60 hover:shadow-[0_12px_28px_rgba(35,32,27,0.08)]"
+        >
+          <input
+            required
+            className="peer sr-only"
+            defaultChecked={defaultValue === option}
+            name={name}
+            type="radio"
+            value={option}
+          />
+          <span className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full border border-[#c9bca8] text-white transition peer-checked:border-[#8d5f3a] peer-checked:bg-[#8d5f3a]">
+            <Check size={13} aria-hidden="true" />
+          </span>
+          <span className="block pr-8 text-sm font-semibold text-[#332d25]">
+            {option}
+          </span>
+          {hints[option] ? (
+            <span className="mt-2 block text-sm leading-5 text-[#6f6658]">
+              {hints[option]}
+            </span>
+          ) : null}
+          <span className="pointer-events-none absolute inset-0 rounded-md ring-0 ring-[#8d5f3a]/25 transition peer-checked:bg-[#8d5f3a]/8 peer-checked:ring-2 peer-focus-visible:ring-2" />
+        </label>
+      ))}
+    </div>
+  );
+}
 
 interface FormDraft {
   recoveryEmail?: string;
@@ -54,6 +223,12 @@ function saveDraft(draft: FormDraft): void {
   }
 }
 
+const sectionClassName =
+  "mt-12 grid gap-8 border-t border-[#d8ccb9] pt-10 sm:mt-14 sm:pt-12";
+const questionClassName = "grid gap-4";
+const questionLegendClassName =
+  "mb-5 flex items-center gap-2 text-base font-semibold text-[#3c352c]";
+
 export function HackaDeckForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,6 +238,7 @@ export function HackaDeckForm() {
   const [draft, setDraft] = useState<FormDraft>({});
   const [hydrated, setHydrated] = useState(false);
   const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
+  const [detailValue, setDetailValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,6 +251,7 @@ export function HackaDeckForm() {
       ...(recoveryEmail ? { recoveryEmail } : {}),
     });
     if (saved.powers) setSelectedPowers(saved.powers);
+    setDetailValue(saved.detail ?? "");
     setHydrated(true);
   }, [searchParams]);
 
@@ -133,6 +310,11 @@ export function HackaDeckForm() {
       setTimeout(() => persistForm(), 0);
       return next;
     });
+  }
+
+  function chooseDetailExample(example: string) {
+    setDetailValue(example);
+    setTimeout(() => persistForm(), 0);
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -204,17 +386,19 @@ export function HackaDeckForm() {
   return (
     <form
       ref={formRef}
-      className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-6"
+      className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-5 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-8"
       onChange={persistForm}
       onSubmit={handleSubmit}
     >
       <input name="eventSlug" type="hidden" value={eventSlug} />
 
-      <label className="mb-4 grid gap-2">
-        <span className="text-sm font-bold text-[#51493d]">Event</span>
+      <label className="grid gap-2">
+        <span className="text-xs font-semibold tracking-[0.18em] text-[#8d5f3a] uppercase">
+          Event
+        </span>
         {activeEvents === undefined ? (
           <div className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 text-[#6f6658]">
-            Loading events...
+            Loading events…
           </div>
         ) : activeEvents.length === 0 ? (
           <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-700">
@@ -236,214 +420,222 @@ export function HackaDeckForm() {
         )}
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">
-            Recovery email
-          </span>
-          <input
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            defaultValue={draft.recoveryEmail}
-            name="recoveryEmail"
-            placeholder="you@example.com"
-            type="email"
-          />
-        </label>
+      <section className={sectionClassName}>
+        <FieldText eyebrow="Basics" title="Name your card">
+          The email only helps you find your card again. The name is what goes
+          on the artifact.
+        </FieldText>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <label className="grid gap-2">
+            <span className="flex items-center gap-2 text-sm font-semibold text-[#51493d]">
+              <Mail size={16} aria-hidden="true" />
+              Recovery email
+            </span>
+            <input
+              required
+              className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+              defaultValue={draft.recoveryEmail}
+              name="recoveryEmail"
+              placeholder="you@example.com"
+              type="email"
+            />
+          </label>
 
-        <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">Display name</span>
-          <input
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            defaultValue={draft.displayName}
-            maxLength={24}
-            name="displayName"
-            placeholder="Maya"
-          />
-        </label>
-      </div>
-
-      <label className="mt-4 grid gap-2">
-        <span className="text-sm font-bold text-[#51493d]">Team name</span>
-        <input
-          className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-          defaultValue={draft.teamName}
-          maxLength={40}
-          name="teamName"
-          placeholder="Cache Money"
-        />
-      </label>
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">Role today</span>
-          <select
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            name="roleToday"
-            defaultValue={draft.roleToday ?? ""}
-          >
-            <option disabled value="">
-              Choose your lane
-            </option>
-            {roleOptions.map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">
-            What should this capture?
-          </span>
-          <select
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            name="cardIntent"
-            defaultValue={draft.cardIntent ?? ""}
-          >
-            <option disabled value="">
-              Pick a vibe
-            </option>
-            {cardIntentOptions.map((intent) => (
-              <option key={intent} value={intent}>
-                {intent}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <label className="mt-4 grid gap-2">
-        <span className="text-sm font-bold text-[#51493d]">Build energy</span>
-        <select
-          required
-          className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-          name="buildEnergy"
-          defaultValue={draft.buildEnergy ?? ""}
-        >
-          <option disabled value="">
-            Choose your energy
-          </option>
-          {buildEnergyOptions.map((energy) => (
-            <option key={energy} value={energy}>
-              {energy}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <fieldset className="mt-5">
-        <legend className="text-sm font-bold text-[#51493d]">
-          Hackathon powers
-        </legend>
-        <p className="mt-1 text-sm text-[#6f6658]">{powerHelp}</p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {powerOptions.map((power) => {
-            const isSelected = selectedPowers.includes(power);
-
-            return (
-              <button
-                key={power}
-                className={cn(
-                  "flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-left text-sm font-semibold transition",
-                  isSelected
-                    ? "border-[#8d5f3a] bg-[#8d5f3a] text-white"
-                    : "border-[#d8ccb9] bg-white text-[#51493d]",
-                )}
-                type="button"
-                onClick={() => togglePower(power)}
-              >
-                <span>{power}</span>
-                {isSelected ? <Check size={16} aria-hidden="true" /> : null}
-              </button>
-            );
-          })}
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold text-[#51493d]">
+              Display name
+            </span>
+            <input
+              required
+              className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+              defaultValue={draft.displayName}
+              maxLength={24}
+              name="displayName"
+              placeholder="Maya"
+            />
+          </label>
         </div>
-        {selectedPowers.map((power) => (
-          <input key={power} name="powers" type="hidden" value={power} />
-        ))}
-      </fieldset>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">
-            Harmless weakness
+          <span className="text-sm font-semibold text-[#51493d]">
+            Team name
           </span>
-          <select
-            required
+          <input
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            defaultValue={draft.teamName}
+            maxLength={40}
+            name="teamName"
+            placeholder="Cache Money"
+          />
+        </label>
+      </section>
+
+      <section className={sectionClassName}>
+        <FieldText eyebrow="Builder vibe" title="Choose your silhouette">
+          Fast choices, no overthinking. These steer the title, stats, and field
+          note.
+        </FieldText>
+
+        <fieldset className={questionClassName}>
+          <legend className={questionLegendClassName}>
+            <Sparkles size={16} aria-hidden="true" />
+            What are you mostly doing today?
+          </legend>
+          <TileRadioGroup
+            name="roleToday"
+            options={roleOptions}
+            defaultValue={draft.roleToday}
+            hints={roleHints}
+          />
+        </fieldset>
+
+        <fieldset className={questionClassName}>
+          <legend className={questionLegendClassName}>
+            <Palette size={16} aria-hidden="true" />
+            What should this card capture?
+          </legend>
+          <TileRadioGroup
+            name="cardIntent"
+            options={cardIntentOptions}
+            defaultValue={draft.cardIntent}
+            hints={intentHints}
+          />
+        </fieldset>
+
+        <fieldset className={questionClassName}>
+          <legend className={questionLegendClassName}>
+            <Zap size={16} aria-hidden="true" />
+            What is your build energy?
+          </legend>
+          <TileRadioGroup
+            name="buildEnergy"
+            options={buildEnergyOptions}
+            defaultValue={draft.buildEnergy}
+            hints={energyHints}
+          />
+        </fieldset>
+      </section>
+
+      <section className={sectionClassName}>
+        <FieldText eyebrow="Powers" title="Pick your strongest three">
+          Choose 1-3. A tight trio makes a better card than a full resume.
+        </FieldText>
+
+        <fieldset className="grid gap-4">
+          <legend className="sr-only">Hackathon powers</legend>
+          <p className="text-base font-semibold text-[#3c352c]">{powerHelp}</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {powerOptions.map((power) => {
+              const isSelected = selectedPowers.includes(power);
+
+              return (
+                <button
+                  key={power}
+                  className={cn(
+                    "flex min-h-[72px] items-center justify-between rounded-md border px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(35,32,27,0.08)]",
+                    isSelected
+                      ? "border-[#8d5f3a] bg-[#8d5f3a] text-white"
+                      : "border-[#d8ccb9] bg-white text-[#51493d]",
+                  )}
+                  type="button"
+                  onClick={() => togglePower(power)}
+                >
+                  <span>{power}</span>
+                  {isSelected ? <Check size={16} aria-hidden="true" /> : null}
+                </button>
+              );
+            })}
+          </div>
+          {selectedPowers.map((power) => (
+            <input key={power} name="powers" type="hidden" value={power} />
+          ))}
+        </fieldset>
+      </section>
+
+      <section className={sectionClassName}>
+        <FieldText eyebrow="Card ingredients" title="Add the lovable evidence">
+          A harmless flaw, a desk relic, and a familiar choice give the card its
+          tiny story.
+        </FieldText>
+
+        <fieldset className={questionClassName}>
+          <legend className={questionLegendClassName}>
+            <CircleHelp size={16} aria-hidden="true" />
+            Pick your harmless weakness
+          </legend>
+          <TileRadioGroup
             name="weakness"
-            defaultValue={draft.weakness ?? ""}
-          >
-            <option disabled value="">
-              Pick one
-            </option>
-            {weaknessOptions.map((weakness) => (
-              <option key={weakness} value={weakness}>
-                {weakness}
-              </option>
-            ))}
-          </select>
-        </label>
+            options={weaknessOptions}
+            defaultValue={draft.weakness}
+            hints={weaknessHints}
+          />
+        </fieldset>
 
-        <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">
-            Hackathon relic
-          </span>
-          <select
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+        <fieldset className={questionClassName}>
+          <legend className={questionLegendClassName}>
+            <Gem size={16} aria-hidden="true" />
+            What object belongs on your card?
+          </legend>
+          <TileRadioGroup
             name="relic"
-            defaultValue={draft.relic ?? ""}
-          >
-            <option disabled value="">
-              Pick one
-            </option>
-            {relicOptions.map((relic) => (
-              <option key={relic} value={relic}>
-                {relic}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+            options={relicOptions}
+            defaultValue={draft.relic}
+            columns="sm:grid-cols-3"
+            hints={relicHints}
+          />
+        </fieldset>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">
-            Animal companion
-          </span>
-          <select
-            required
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+        <fieldset className={questionClassName}>
+          <legend className={questionLegendClassName}>
+            <Sparkles size={16} aria-hidden="true" />
+            Pick your familiar, or let us choose
+          </legend>
+          <TileRadioGroup
             name="animalCompanionPreference"
+            options={animalCompanionOptions}
             defaultValue={draft.animalCompanionPreference ?? "Surprise me"}
-          >
-            {animalCompanionOptions.map((animal) => (
-              <option key={animal} value={animal}>
-                {animal}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+            columns="sm:grid-cols-3"
+            hints={animalHints}
+          />
+        </fieldset>
+      </section>
 
-      <label className="mt-4 grid gap-2">
-        <span className="text-sm font-bold text-[#51493d]">
-          What tiny detail would make your teammates say "yeah, that's you"?
-        </span>
-        <textarea
-          className="min-h-24 resize-y rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-          defaultValue={draft.detail}
-          maxLength={160}
-          name="detail"
-          placeholder="I always blame headers first."
-        />
-      </label>
+      <section className={sectionClassName}>
+        <FieldText eyebrow="Tiny detail" title="Give the card one human tell">
+          Pick an example or write your own. This is optional, but it is often
+          where the funniest card detail comes from.
+        </FieldText>
+
+        <div className="flex flex-wrap gap-3">
+          {detailExamples.map((example) => (
+            <button
+              key={example}
+              className="rounded-full border border-[#d8ccb9] bg-white px-4 py-2.5 text-left text-sm font-medium text-[#51493d] transition hover:border-[#8d5f3a] hover:bg-[#8d5f3a]/8"
+              type="button"
+              onClick={() => chooseDetailExample(example)}
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+
+        <label className="grid gap-3">
+          <span className="text-base font-semibold text-[#3c352c]">
+            Or write the thing your teammates would recognize
+          </span>
+          <textarea
+            className="min-h-28 resize-y rounded-md border border-[#c9bca8] bg-white px-4 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            maxLength={160}
+            name="detail"
+            onChange={(event) => setDetailValue(event.target.value)}
+            placeholder="I always blame headers first."
+            value={detailValue}
+          />
+          <span className="text-xs text-[#6f6658]">
+            {detailValue.length}/160 characters
+          </span>
+        </label>
+      </section>
 
       <label className="mt-4 flex items-start gap-3 rounded-md border border-[#d8ccb9] bg-white p-3">
         <input

@@ -12,10 +12,29 @@ HackaDeck turns every hackathon builder into a shareable AI-generated collectibl
 
 Only list tracks where the sponsor tool is visible in the core demo.
 
-- Convex: yes, if you show event setup, quiz submission, queued card runs, participant deck state, and live updates.
-- OpenAI: yes, if you show the model turning quiz answers into a structured card spec and generated familiar art.
-- Design/frontend tracks: yes, if the track rewards polished product UX or shareable artifacts.
-- Anything else: only list it if the judge can point to that tool during the demo without you explaining around it.
+Recommended tracks:
+
+- OpenAI / Codex, Best use of GPT-5.5 & Codex: apply. GPT-5.5 is central to the structured card-spec generation, and Codex is a credible part of the build story if the team used it to ship/debug quickly.
+- OpenAI / Codex, Best use of GPT Image 2: apply. GPT Image 2 generates the central Builder Familiar art, which is one of the main emotional artifacts in the demo.
+- Convex: apply. Convex owns event setup, participant identity, quiz submissions, queued card runs, selected cards/looks, and participant deck state.
+
+Conditional tracks:
+
+- Adaption Labs: apply only if the main judging form allows general sponsor submissions without a required API/tool integration. Treat this as a general product prize, not a technical integration claim.
+- Fal: apply only if familiar art or media generation actually uses Fal in the submitted build.
+- Best Gen Media Track, Gemini: apply only if Gemini is meaningfully used for generated media. Do not apply if all generation is OpenAI.
+- Best Voice Agent Track, Gemini: skip unless a voice flow is live.
+- Best use of GPT Realtime 2 or GPT Realtime Translate: skip unless realtime voice/translation is live.
+- Best use of the Cursor SDK: skip unless the product or build uses the Cursor SDK, not just Cursor as an editor.
+- Most creative use of Exa: skip unless Exa powers a visible research/search feature.
+- Best use of Smithery: skip unless Smithery connectors are part of the demo.
+
+Submission default:
+
+1. Best use of GPT-5.5 & Codex
+2. Best use of GPT Image 2
+3. Convex
+4. Adaption Labs, if it is a general placement track
 
 ## Core story
 
@@ -94,6 +113,7 @@ AI is central to the core loop. The language model interprets participant answer
 
 ## Demo Day Checklist
 
+- Run the optional Slidev intro deck: `pnpm dlx @slidev/cli docs/slides/hackadeck-demo.md --open`.
 - Seed an active event before the demo.
 - Verify the form loads with the event selected.
 - Prepare one clean browser profile or incognito window.
