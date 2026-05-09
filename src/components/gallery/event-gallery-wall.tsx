@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, QrCode, Sparkles } from "lucide-react";
 import { useQuery } from "convex/react";
 
@@ -16,6 +10,8 @@ import { api } from "../../../convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HackaDeckCard } from "@/components/card/hackadeck-card";
+import type { HackaDeckCardSpec } from "@/lib/card-schema";
 
 const GALLERY_LIMIT = 72;
 const JUST_HATCHED_MS = 10_000;
@@ -24,8 +20,59 @@ function buildersLabel(count: number) {
   return `${count} ${count === 1 ? "builder" : "builders"} hatched`;
 }
 
-function safeAccentColor(color: string) {
-  return /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#8d5f3a";
+const CARD_WIDTH = 1024;
+const CARD_HEIGHT = 1536;
+
+function ScaledGalleryCard({
+  children,
+  isJustHatched,
+}: {
+  children: React.ReactNode;
+  isJustHatched: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      setScale(el.offsetWidth / CARD_WIDTH);
+    };
+    updateScale();
+
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <article
+      ref={containerRef}
+      className="relative overflow-hidden"
+      style={{ aspectRatio: `${CARD_WIDTH}/${CARD_HEIGHT}` }}
+      data-just-hatched={isJustHatched ? "true" : undefined}
+    >
+      {isJustHatched ? (
+        <div className="bg-foreground text-background absolute top-2 right-2 z-10 px-2 py-1 text-xs font-semibold tracking-wide uppercase">
+          Just hatched
+        </div>
+      ) : null}
+      {scale > 0 ? (
+        <div
+          className="origin-top-left"
+          style={{
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            transform: `scale(${scale})`,
+          }}
+        >
+          {children}
+        </div>
+      ) : null}
+    </article>
+  );
 }
 
 export function EventGalleryWall({ slug }: { slug: string }) {
@@ -179,58 +226,20 @@ export function EventGalleryWall({ slug }: { slug: string }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-            {gallery.cards.map((card) => {
-              const isJustHatched = highlightedIds.has(card._id);
-              const accentColor = safeAccentColor(card.accentColor);
-
-              return (
-                <article
-                  key={card._id}
-                  className="group border-border bg-card relative overflow-hidden border"
-                  data-just-hatched={isJustHatched ? "true" : undefined}
-                  style={
-                    { "--gallery-card-accent": accentColor } as CSSProperties
-                  }
-                >
-                  {isJustHatched ? (
-                    <div className="bg-foreground text-background absolute top-2 right-2 z-10 px-2 py-1 text-xs font-semibold tracking-wide uppercase">
-                      Just hatched
-                    </div>
-                  ) : null}
-                  <div className="bg-secondary aspect-[4/5]">
-                    <img
-                      src={card.avatarImageUrl}
-                      alt={`${card.familiarSpecies} familiar art for ${card.displayName}`}
-                      className="h-full w-full object-contain p-3"
-                    />
-                  </div>
-                  <div className="border-t-4 border-[var(--gallery-card-accent)] p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h2 className="text-foreground truncate text-lg font-medium">
-                          {card.displayName}
-                        </h2>
-                        <p className="text-foreground/70 mt-1 line-clamp-2 min-h-10 text-sm leading-5">
-                          {card.earnedTitle}
-                        </p>
-                      </div>
-                      <span className="text-foreground/55 shrink-0 text-sm font-semibold">
-                        #{String(card.cardNumber).padStart(4, "0")}
-                      </span>
-                    </div>
-                    {card.teamName ? (
-                      <p className="text-foreground/45 mt-3 truncate text-xs font-semibold tracking-wide uppercase">
-                        {card.teamName}
-                      </p>
-                    ) : (
-                      <p className="text-foreground/35 mt-3 text-xs font-semibold tracking-wide uppercase">
-                        Solo build
-                      </p>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+            {gallery.cards.map((card) => (
+              <ScaledGalleryCard
+                key={card._id}
+                isJustHatched={highlightedIds.has(card._id)}
+              >
+                <HackaDeckCard
+                  spec={card.spec as HackaDeckCardSpec}
+                  imageUrl={card.avatarImageUrl}
+                  cardNumber={card.cardNumber}
+                  eventName={gallery.event.name}
+                  participantDisplayName={card.displayName}
+                />
+              </ScaledGalleryCard>
+            ))}
           </div>
         )}
       </section>

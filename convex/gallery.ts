@@ -53,8 +53,7 @@ export const getEventGallery = query({
         createdAt: card.createdAt,
         displayName: participant.displayName,
         teamName: participant.teamName,
-        earnedTitle: card.spec.earned_title,
-        familiarSpecies: card.spec.familiar_species,
+        spec: card.spec,
         avatarImageUrl:
           selectedLook && selectedLook.cardId === card._id
             ? selectedLook.avatarImageUrl
@@ -63,7 +62,6 @@ export const getEventGallery = query({
           selectedLook && selectedLook.cardId === card._id
             ? selectedLook.finalPngUrl
             : card.finalPngUrl,
-        accentColor: card.spec.accent_color,
       });
     }
 

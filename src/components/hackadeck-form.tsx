@@ -13,8 +13,9 @@ import {
   buildEnergyOptions,
   roleOptions,
 } from "@/lib/form-options";
-import { formAnswerSchema } from "@/lib/card-schema";
+import { formAnswerSchema, type HackaDeckCardSpec } from "@/lib/card-schema";
 import { cn } from "@/lib/utils";
+import { HackaDeckCard } from "@/components/card/hackadeck-card";
 
 const STORAGE_KEY = "hackadeck-form-draft";
 
@@ -130,8 +131,47 @@ function saveDraft(draft: FormDraft): void {
 const sectionClassName =
   "mt-10 grid gap-6 border-t border-[#d8ccb9] pt-8 sm:mt-12 sm:pt-10";
 
-function safeAccentColor(color: string) {
-  return /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#8d5f3a";
+const CARD_WIDTH = 1024;
+const CARD_HEIGHT = 1536;
+
+function ScaledPreviewCard({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      setScale(el.offsetWidth / CARD_WIDTH);
+    };
+    updateScale();
+
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative overflow-hidden rounded-lg"
+      style={{ aspectRatio: `${CARD_WIDTH}/${CARD_HEIGHT}` }}
+    >
+      {scale > 0 ? (
+        <div
+          className="origin-top-left"
+          style={{
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            transform: `scale(${scale})`,
+          }}
+        >
+          {children}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function LatestCardPreview({ eventSlug }: { eventSlug: string }) {
@@ -151,7 +191,8 @@ function LatestCardPreview({ eventSlug }: { eventSlug: string }) {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="aspect-[4/5] animate-pulse rounded-md bg-[#ede4d5]"
+              className="animate-pulse rounded-md bg-[#ede4d5]"
+              style={{ aspectRatio: `${CARD_WIDTH}/${CARD_HEIGHT}` }}
             />
           ))}
         </div>
@@ -184,33 +225,17 @@ function LatestCardPreview({ eventSlug }: { eventSlug: string }) {
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3">
-        {gallery.cards.map((card) => {
-          const accentColor = safeAccentColor(card.accentColor);
-
-          return (
-            <article
-              key={card._id}
-              className="min-w-0 overflow-hidden rounded-md border border-[#d8ccb9] bg-[#fffaf0]"
-              style={{ borderTopColor: accentColor, borderTopWidth: 4 }}
-            >
-              <div className="aspect-[4/5] bg-[#ede4d5]">
-                <img
-                  src={card.avatarImageUrl}
-                  alt={`${card.earnedTitle} card for ${card.displayName}`}
-                  className="h-full w-full object-contain p-2"
-                />
-              </div>
-              <div className="p-2">
-                <p className="truncate text-xs font-black text-[#332d25]">
-                  {card.displayName}
-                </p>
-                <p className="mt-1 line-clamp-2 min-h-8 text-[11px] leading-4 text-[#6f6658]">
-                  {card.earnedTitle}
-                </p>
-              </div>
-            </article>
-          );
-        })}
+        {gallery.cards.map((card) => (
+          <ScaledPreviewCard key={card._id}>
+            <HackaDeckCard
+              spec={card.spec as HackaDeckCardSpec}
+              imageUrl={card.avatarImageUrl}
+              cardNumber={card.cardNumber}
+              eventName={gallery.event.name}
+              participantDisplayName={card.displayName}
+            />
+          </ScaledPreviewCard>
+        ))}
       </div>
     </section>
   );

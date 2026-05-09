@@ -193,9 +193,11 @@ describe("getEventGallery", () => {
     expect(gallery?.cards[0]).toMatchObject({
       cardNumber: 5,
       teamName: "Cache Money",
-      earnedTitle: "Keeper of the Tiny Repro",
       avatarImageUrl: "https://example.com/look-5.png",
     });
+    expect(gallery?.cards[0].spec.earned_title).toBe(
+      "Keeper of the Tiny Repro",
+    );
   });
 
   it("excludes public cards that are not the participant selected card", async () => {
