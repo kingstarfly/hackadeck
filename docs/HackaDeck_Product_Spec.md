@@ -907,10 +907,24 @@ Use Convex:
 
 Store generated art and final PNG URLs. Options:
 
-- Convex file storage if available
-- Vercel Blob
+- Convex file storage as the preferred MVP storage path
+- Vercel Blob if Convex file storage blocks the team
 - S3/R2 if already configured
 - Base64 temporarily only if needed for hack speed, but avoid for gallery scale
+
+### Generation ownership
+
+Use Convex actions to orchestrate generation and status updates:
+
+- GPT-5.5 structured card spec generation
+- GPT Image 2 familiar art generation
+- Asset upload/storage references
+- Card run status transitions
+- Card/look creation and selection
+
+The browser may handle final PNG export if server-side rendering is flaky. In
+that fallback, keep the Convex card/look records authoritative and upload the
+PNG URL when available.
 
 ---
 
@@ -1155,6 +1169,13 @@ If PNG rendering fails:
 - Show live HTML card preview.
 - Allow user to screenshot/share.
 - Keep card in gallery if possible.
+
+Retry rules:
+
+- Failed card run: allow `Retry hatching card`, reusing the same form answers
+  and card number.
+- Failed look generation: allow retry without consuming an additional look slot.
+- Do not create duplicate cards for retries of the same failed run.
 
 ---
 

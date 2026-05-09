@@ -11,6 +11,27 @@ export const roleOptions = [
   "I am doing everything somehow",
 ] as const;
 
+export const cardIntentOptions = [
+  "My actual role today",
+  "My chaotic inner builder",
+  "My team energy",
+  "My secret superpower",
+  "Surprise me, but be kind",
+] as const;
+
+export const buildEnergyOptions = [
+  "Calm shipper",
+  "Deadline gremlin",
+  "Pixel perfectionist",
+  "Bug hunter",
+  "Idea fountain",
+  "Team therapist",
+  "Quiet optimizer",
+  "Demo magician",
+  "Shortcut goblin",
+  "Last-minute philosopher",
+] as const;
+
 export const powerOptions = [
   "Debugging weird errors",
   "Making ugly things usable",
@@ -24,6 +45,9 @@ export const powerOptions = [
   "Turning docs into code",
   "Reading stack traces",
   "Talking to sponsors",
+  "Naming things beautifully",
+  "Making the first working version",
+  "Cutting scope without guilt",
 ] as const;
 
 export const weaknessOptions = [
@@ -36,7 +60,29 @@ export const weaknessOptions = [
   "Names variables dramatically",
   'Says "one quick refactor"',
   "Trusts the API docs too much",
-  "Demo risk magnet",
+  "Demo gremlin attractor",
+  "Keeps changing the prompt",
+  "Needs one more coffee",
+] as const;
+
+export const relicOptions = [
+  "Coffee cup",
+  "Rubber duck",
+  "Headphones",
+  "Sticky notes",
+  "Cable mess",
+  "Hoodie",
+  "Snacks",
+  "Tiny plant",
+  "Whiteboard marker",
+  "Lucky keyboard key",
+  "Terminal lantern",
+  "Surprise me",
+] as const;
+
+export const cardFormOptions = [
+  "Builder Familiar",
+  "Maker Avatar",
 ] as const;
 
 export const familiarOptions = [
@@ -50,4 +96,5 @@ export const familiarOptions = [
   "Cat",
   "Turtle",
   "Dog",
+  "Moth",
 ] as const;

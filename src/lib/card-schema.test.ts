@@ -6,23 +6,28 @@ import { buildCardSpecUserPrompt, buildFamiliarArtPrompt } from "@/lib/prompts";
 describe("HackaDeck schemas and prompts", () => {
   it("accepts the Maya sample form answers and builds safe prompt text", () => {
     const answers = formAnswerSchema.parse({
-      email: "maya@example.com",
+      eventSlug: "ai-engineer-hack-2026",
+      recoveryEmail: "maya@example.com",
       displayName: "Maya",
       teamName: "Cache Money",
       roleToday: "Backend builder",
+      cardIntent: "My actual role today",
+      buildEnergy: "Bug hunter",
       powers: [
         "Fixing APIs",
         "Reading stack traces",
         "Shipping under pressure",
       ],
       weakness: "Too many tabs",
-      familiarType: "Owl",
+      relic: "Rubber duck",
+      cardForm: "Builder Familiar",
+      familiarPreference: "Owl",
       detail: "I always blame headers first.",
       consentGallery: true,
     });
 
     expect(buildCardSpecUserPrompt(answers)).toContain(
-      "Email identity: maya@example.com",
+      "Recovery email: maya@example.com",
     );
   });
 
@@ -32,9 +37,16 @@ describe("HackaDeck schemas and prompts", () => {
         display_name: "Maya",
         team_name: "Cache Money",
         edition: "AI Engineers Singapore 2026",
-        archetype_title: "Keeper of Header Owl",
+        earned_title: "Keeper of the Tiny Repro",
+        archetype_base: "Bug Hunter",
+        card_intent: "My actual role today",
         familiar_species: "Owl",
         familiar_descriptor: "a calm debug owl with tiny glasses",
+        personal_relic: {
+          name: "Rubber Duck Lantern",
+          visual: "a tiny yellow rubber duck holding a warm desk lamp",
+          meaning: "helps them debug without panic",
+        },
         rarity: "Rare",
         print_finish: "Stamped",
         stats: {
@@ -43,23 +55,33 @@ describe("HackaDeck schemas and prompts", () => {
           Taste: 74,
           Chaos: 68,
         },
+        stat_icons: {
+          Build: "hammer",
+          Debug: "lantern",
+          Taste: "star",
+          Chaos: "bolt",
+        },
         signature_move: {
           name: "Endpoint Exorcism",
           description: "Turns one haunted API response into clean JSON.",
         },
-        flavor_text: "When the docs go quiet, Maya listens to the headers.",
+        field_note: "When the docs go quiet, Maya listens to the headers.",
         accent_color: "#7A5C3E",
         art_prompt: buildFamiliarArtPrompt({
           animalSpecies: "Owl",
           roleToday: "Backend builder",
+          cardIntent: "My actual role today",
+          buildEnergy: "Bug hunter",
           powers: [
             "Fixing APIs",
             "Reading stack traces",
             "Shipping under pressure",
           ],
           weakness: "Too many tabs",
-          archetype: "Keeper of Header Owl",
-          visualDetail: "tiny round glasses",
+          earnedTitle: "Keeper of the Tiny Repro",
+          personalRelicVisual:
+            "a tiny yellow rubber duck holding a warm desk lamp",
+          tinyDetail: "I always blame headers first.",
         }),
         negative_prompt_notes: ["no neon", "no card text"],
       }),

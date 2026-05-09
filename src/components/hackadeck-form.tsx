@@ -4,8 +4,12 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Check, WandSparkles } from "lucide-react";
 
 import {
+  buildEnergyOptions,
+  cardFormOptions,
+  cardIntentOptions,
   familiarOptions,
   powerOptions,
+  relicOptions,
   roleOptions,
   weaknessOptions,
 } from "@/lib/form-options";
@@ -37,13 +41,17 @@ export function HackaDeckForm() {
 
   return (
     <form className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-6">
+      <input name="eventSlug" type="hidden" value="ai-engineer-hack-2026" />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-sm font-bold text-[#51493d]">Email</span>
+          <span className="text-sm font-bold text-[#51493d]">
+            Recovery email
+          </span>
           <input
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            name="email"
+            name="recoveryEmail"
             placeholder="you@example.com"
             type="email"
           />
@@ -71,20 +79,62 @@ export function HackaDeckForm() {
         />
       </label>
 
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-2">
+          <span className="text-sm font-bold text-[#51493d]">Role today</span>
+          <select
+            required
+            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            name="roleToday"
+            defaultValue=""
+          >
+            <option disabled value="">
+              Choose your lane
+            </option>
+            {roleOptions.map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-bold text-[#51493d]">
+            What should this capture?
+          </span>
+          <select
+            required
+            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            name="cardIntent"
+            defaultValue=""
+          >
+            <option disabled value="">
+              Pick a vibe
+            </option>
+            {cardIntentOptions.map((intent) => (
+              <option key={intent} value={intent}>
+                {intent}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <label className="mt-4 grid gap-2">
-        <span className="text-sm font-bold text-[#51493d]">Role today</span>
+        <span className="text-sm font-bold text-[#51493d]">Build energy</span>
         <select
           required
           className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-          name="roleToday"
+          name="buildEnergy"
           defaultValue=""
         >
           <option disabled value="">
-            Choose your lane
+            Choose your energy
           </option>
-          {roleOptions.map((role) => (
-            <option key={role} value={role}>
-              {role}
+          {buildEnergyOptions.map((energy) => (
+            <option key={energy} value={energy}>
+              {energy}
             </option>
           ))}
         </select>
@@ -146,12 +196,51 @@ export function HackaDeckForm() {
 
         <label className="grid gap-2">
           <span className="text-sm font-bold text-[#51493d]">
-            Familiar type
+            Hackathon relic
           </span>
           <select
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            name="familiarType"
+            name="relic"
+            defaultValue=""
+          >
+            <option disabled value="">
+              Pick one
+            </option>
+            {relicOptions.map((relic) => (
+              <option key={relic} value={relic}>
+                {relic}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-2">
+          <span className="text-sm font-bold text-[#51493d]">Card form</span>
+          <select
+            required
+            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            name="cardForm"
+            defaultValue="Builder Familiar"
+          >
+            {cardFormOptions.map((form) => (
+              <option key={form} value={form}>
+                {form}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-bold text-[#51493d]">
+            Familiar preference
+          </span>
+          <select
+            required
+            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            name="familiarPreference"
             defaultValue="Surprise me"
           >
             {familiarOptions.map((familiar) => (
@@ -165,7 +254,7 @@ export function HackaDeckForm() {
 
       <label className="mt-4 grid gap-2">
         <span className="text-sm font-bold text-[#51493d]">
-          Add one boring or funny detail about yourself
+          What tiny detail would make your teammates say "yeah, that's you"?
         </span>
         <textarea
           className="min-h-24 resize-y rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"

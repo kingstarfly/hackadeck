@@ -3,10 +3,13 @@ import type { FormAnswers } from "@/lib/card-schema";
 export function buildFamiliarArtPrompt(input: {
   animalSpecies: string;
   roleToday: string;
+  cardIntent: string;
+  buildEnergy: string;
   powers: string[];
   weakness: string;
-  archetype: string;
-  visualDetail?: string;
+  earnedTitle: string;
+  personalRelicVisual: string;
+  tinyDetail?: string;
 }) {
   return `Create central mascot art only for a vertical collectible hackathon card.
 
@@ -21,19 +24,22 @@ A ${input.animalSpecies} builder familiar representing a hackathon participant.
 
 Participant traits:
 - Role: ${input.roleToday}
+- Card intent: ${input.cardIntent}
+- Build energy: ${input.buildEnergy}
 - Strengths: ${input.powers.join(", ")}
 - Harmless weakness: ${input.weakness}
-- Archetype: ${input.archetype}
-- Optional detail: ${input.visualDetail || "None"}
+- Earned title: ${input.earnedTitle}
+- Personal relic: ${input.personalRelicVisual}
+- Tiny personal detail: ${input.tinyDetail || "None"}
 
 Visual direction:
-Show the familiar as a clever desk companion with one small developer-themed prop if useful: tiny laptop, sticky note, coffee cup, cable, rubber duck, terminal card, checklist, or small tool. Keep the prop subtle and integrated.
+Show the familiar as a small desk companion observed during a real hackathon. Include exactly one meaningful personal relic or developer-themed prop. The relic should feel specific to this person. One meaningful prop is better than many generic coding objects.
 
 Composition:
 Single centered character, full body visible, generous padding, three-quarter view, clean silhouette. Simple warm background shape or paper-toned backdrop. No card frame.
 
 Constraints:
-No text, no letters, no numbers, no logos, no trademarks, no watermark, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no busy background.`;
+No text, no letters, no numbers, no logos, no trademarks, no watermark, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no busy background, no wizard robes, no fantasy armor, no magical staffs, no dramatic spell effects, no glowing eyes.`;
 }
 
 export function buildCardSpecSystemPrompt() {
@@ -49,13 +55,18 @@ export function buildCardSpecSystemPrompt() {
 export function buildCardSpecUserPrompt(answers: FormAnswers) {
   return `Create a HackaDeck card spec for this participant.
 
-Email identity: ${answers.email}
+Event: ${answers.eventSlug}
+Recovery email: ${answers.recoveryEmail}
 Display name: ${answers.displayName}
 Team: ${answers.teamName || "None"}
 Role today: ${answers.roleToday}
+Card intent: ${answers.cardIntent}
+Build energy: ${answers.buildEnergy}
 Powers: ${answers.powers.join(", ")}
 Harmless weakness: ${answers.weakness}
-Familiar preference: ${answers.familiarType}
+Personal relic: ${answers.relic}
+Card form: ${answers.cardForm}
+Familiar preference: ${answers.familiarPreference}
 Detail: ${answers.detail || "None"}
 Edition: AI Engineers Singapore 2026`;
 }
