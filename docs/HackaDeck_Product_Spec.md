@@ -1,18 +1,22 @@
 # HackaDeck Build Spec
 
-**Goal for 5pm:** ship a working QR-to-card experience where participants answer a short quiz and receive a polished, downloadable hackathon collectible card. The winning demo is a live gallery of real participant cards.
+**Goal for 5pm:** ship a working QR-to-card experience where participants answer a short playful quiz and receive a polished, downloadable hackathon collectible card. The winning demo is a live gallery of real participant cards.
 
 **Core promise:**
 
-> Scan a QR code. In under a minute, hatch your limited-edition hackathon card.
+> Scan a QR code. In under a minute, hatch your limited-edition Builder Familiar card.
+
+**Emotional target:**
+
+> The card should feel like something your teammates would lovingly tease you for, while still making you look cool.
 
 ---
 
 ## 1. Final product direction
 
-HackaDeck turns a live hackathon into a collectible card wall. Each builder gets matched with a **Builder Familiar**: a small animal companion that captures their hackathon role, strengths, weakness, and chaos pattern.
+HackaDeck turns a live hackathon into a collectible card wall. Each builder gets matched with a **Builder Familiar**: a small animal companion that captures their role, working style, harmless weakness, personal relic, and hackathon chaos pattern.
 
-The style should feel **polished, simple, and shareworthy**, not generically AI-coded.
+The style should feel **polished, simple, loved, and shareworthy**, not generically AI-coded.
 
 ### House style
 
@@ -27,18 +31,20 @@ The style should feel **polished, simple, and shareworthy**, not generically AI-
 - Crisp editorial typography
 - Subtle paper grain / print texture
 - Small stamped hackathon edition mark
-- Developer-themed props used sparingly
+- One personal relic or prop per card
+- A little weirdness, but not clutter
 
 **Avoid:**
 
 - Neon AI glow
-- Holographic cyberpunk
+- Holographic cyberpunk as the default
 - Glitch / code rain
 - Circuit-board patterns
 - NFT avatar energy
 - Exact Pokémon / Yu-Gi-Oh / Magic / Space Invaders references
 - Busy fantasy battle-card layouts
 - Full anime chibi as the default
+- Wizard robes, staffs, glowing eyes, or generic fantasy RPG styling unless explicitly chosen
 
 ### Default character choice
 
@@ -51,8 +57,19 @@ Why:
 - Easier to keep visually consistent across a gallery
 - Gives personality without needing visual explanation
 - Avoids the generic AI-avatar look
+- Lets the card feel affectionate instead of self-serious
 
 Use “pet” energy, but present it as a **Builder Familiar**.
+
+### Core design principle
+
+Do not optimize only for “accurate role matching.” Optimize for:
+
+1. recognizable at thumbnail size
+2. flattering
+3. funny enough to share
+4. specific enough to feel personal
+5. consistent enough for the gallery
 
 ---
 
@@ -72,8 +89,9 @@ Use “pet” energy, but present it as a **Builder Familiar**.
 
 1. Team fusion cards
 2. Rare print-finish variants
-3. Boss recap poster
-4. Animated reveal video
+3. Icon reference / mini game manual page
+4. Boss recap poster
+5. Animated reveal video
 
 ### Explicitly cut unless ahead
 
@@ -89,7 +107,7 @@ Use “pet” energy, but present it as a **Builder Familiar**.
 
 ## 3. Primary artifact
 
-The main artifact is a **vertical PNG trading-card-style profile card**.
+The main artifact is a **vertical PNG collectible profile card**.
 
 Recommended size:
 
@@ -101,21 +119,22 @@ Recommended size:
 The final card should include:
 
 - Display name
-- Archetype title
+- Earned title
 - Animal familiar species
+- Personal relic
 - Hackathon edition badge
 - Central familiar art
-- 4 stats max
+- 4 stat icons or stat chips
 - Signature move
-- One short flavor line
+- Field note / flavor line
 - Team name if present
-- Card number / gallery number
+- Card number / hatch time / gallery number
 
 The card should read well at thumbnail size. At small size, these should be visible:
 
-1. Familiar silhouette
-2. Display name
-3. Archetype title
+1. familiar silhouette
+2. display name
+3. earned title
 
 ---
 
@@ -127,11 +146,11 @@ For a `1024x1536` canvas:
 
 | Section | Approx height | Contents |
 |---|---:|---|
-| Header | 12% | Name, archetype, edition stamp |
+| Header | 12% | Name, earned title, edition stamp |
 | Art window | 55–60% | Familiar art, large and centered |
-| Stats row | 10–12% | 4 stat chips or bars |
-| Ability box | 12–16% | Signature move + short description |
-| Footer | 4–6% | Team, card number, event mark |
+| Trait / stats strip | 10–12% | personal relic chip + 4 icon stats |
+| Ability box | 12–16% | Signature move + short description + field note |
+| Footer | 4–6% | Team, card number, hatch time, event mark |
 
 ### Typography
 
@@ -146,31 +165,46 @@ font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 Suggested type rules:
 
 - Display name: large, bold, max 20 chars before shrink
-- Archetype: medium, max 32 chars
-- Signature move name: max 24 chars
-- Move description: max 70 chars
-- Flavor text: max 90 chars
+- Earned title: medium, max 36 chars
+- Relic chip: max 32 chars
+- Signature move name: max 26 chars
+- Move description: max 76 chars
+- Field note: max 96 chars
 - Avoid paragraphs
 
-### Stats
+### Stats / icons
 
-Use **4 stats**, not 6.
+Use **4 stats**, not 6. To save space, the card can show **themed icons + small values**, while a separate “manual” explains each icon.
 
-Recommended stats:
+Default stat names for data/spec:
 
 - Build
 - Debug
 - Taste
 - Chaos
 
-Alternative set:
+Front-of-card display can be icon-first:
 
-- Velocity
-- Clarity
-- Craft
-- Stamina
+| Stat | Icon direction | Meaning |
+|---|---|---|
+| Build | hammer / spark / stack | execution, shipping, making |
+| Debug | bug / magnifier / lantern | problem solving, reliability |
+| Taste | star / leaf / eye | design sense, product judgment, polish |
+| Chaos | lightning / swirl / comet | creativity, curveballs, weird energy |
 
-Use values from 40–99. Keep stat totals somewhat balanced so every card feels flattering.
+Implementation note: keep full stat names in the data model for accessibility/tooltips, but render compact icons on the card.
+
+Suggested display:
+
+```txt
+[hammer] 88  [bug] 96  [star] 72  [bolt] 63
+```
+
+Future manual idea:
+
+- `/manual` route or printable one-pager
+- Explains stat icons, rarity stamps, familiar species, relic types, and card numbering
+- Fun gallery companion, not needed for MVP
 
 ---
 
@@ -185,7 +219,7 @@ Use values from 40–99. Keep stat totals somewhat balanced so every card feels 
 7. App renders final card PNG deterministically.
 8. User sees result page.
 9. User can download PNG, reroll art, or view gallery.
-10. Card appears on live gallery wall.
+10. Card appears on live gallery wall if consented.
 
 Target experience:
 
@@ -193,32 +227,62 @@ Target experience:
 45–60 seconds from scan to card reveal
 ```
 
+Status copy should feel playful:
+
+- Reading your build aura...
+- Matching your familiar...
+- Forging your tiny relic...
+- Writing your field note...
+- Hatching card art...
+- Printing your card...
+
 ---
 
-## 6. Form design
+## 6. Quiz design
 
-Keep the form playful and low-cognitive-load.
+The quiz should feel like a personality quiz, not a form. Use multiple choice for almost everything. The goal is to generate variety without making people think too hard.
 
 ### Required fields
 
 - Display name
-- Team name, optional but shown inline
+- Team name, optional but encouraged
 - Role today
+- What the card should capture
+- Build energy
 - 2–3 hackathon powers
 - Harmless weakness
-- Familiar type
-- Optional visual detail
+- Personal relic
+- Familiar preference
+- One tiny personal detail
 - Consent to generate and show card
 
-### One free-text field
+### Better free-text prompt
 
-Label:
+Use this instead of “Add one boring or funny detail about yourself”:
 
-> Add one boring or funny detail about yourself.
+> What tiny detail would make your teammates say “yeah, that’s you”?
 
-The LLM rewrites this into flavor, move text, or passive personality.
+Examples shown as placeholder chips:
 
-### Role options
+- “I always have 40 tabs open.”
+- “I keep saying the CSS is almost done.”
+- “I brought three chargers and no water bottle.”
+- “I name variables dramatically.”
+- “I keep asking if we need auth.”
+
+### Question set
+
+#### 1. Display name
+
+Short text.
+
+#### 2. Team name
+
+Short text, optional.
+
+#### 3. What are you mostly doing today?
+
+Single choice:
 
 - Frontend builder
 - Backend builder
@@ -231,7 +295,34 @@ The LLM rewrites this into flavor, move text, or passive personality.
 - Infra / deployment fixer
 - I am doing everything somehow
 
-### Power options
+#### 4. What should this card capture?
+
+Single choice:
+
+- My actual role today
+- My chaotic inner builder
+- My team energy
+- My secret superpower
+- Surprise me, but be kind
+
+#### 5. What is your build energy?
+
+Single choice:
+
+- Calm shipper
+- Deadline gremlin
+- Pixel perfectionist
+- Bug hunter
+- Idea fountain
+- Team therapist
+- Quiet optimizer
+- Demo magician
+- Shortcut goblin
+- Last-minute philosopher
+
+#### 6. Pick 2–3 hackathon powers
+
+Multi-select:
 
 - Debugging weird errors
 - Making ugly things usable
@@ -245,8 +336,13 @@ The LLM rewrites this into flavor, move text, or passive personality.
 - Turning docs into code
 - Reading stack traces
 - Talking to sponsors
+- Naming things beautifully
+- Making the first working version
+- Cutting scope without guilt
 
-### Weakness options
+#### 7. Pick one harmless weakness
+
+Single choice:
 
 - Too many tabs
 - Scope creep magnet
@@ -258,10 +354,38 @@ The LLM rewrites this into flavor, move text, or passive personality.
 - Says “one quick refactor”
 - Trusts the API docs too much
 - Demo gremlin attractor
+- Keeps changing the prompt
+- Needs one more coffee
 
-### Familiar options
+#### 8. Pick your hackathon relic
 
-Default dropdown:
+Single choice:
+
+- Coffee cup
+- Rubber duck
+- Headphones
+- Sticky notes
+- Cable mess
+- Hoodie
+- Snacks
+- Tiny plant
+- Whiteboard marker
+- Lucky keyboard key
+- Terminal lantern
+- Surprise me
+
+#### 9. Choose your card form
+
+Single choice:
+
+- **Builder Familiar** — animal companion, recommended
+- **Maker Avatar** — tiny stylized builder persona, optional fallback
+
+Default to Builder Familiar.
+
+#### 10. Familiar preference
+
+Single choice:
 
 - Surprise me
 - Owl
@@ -273,6 +397,7 @@ Default dropdown:
 - Cat
 - Turtle
 - Dog
+- Moth
 
 Rare hidden pool:
 
@@ -285,9 +410,104 @@ Rare hidden pool:
 
 Use rare options only when the spec generator decides it fits or when the user selects “Surprise me.”
 
+#### 11. Consent
+
+Checkboxes:
+
+- I agree to generate my card.
+- Show my card in the public gallery.
+
 ---
 
-## 7. Card spec JSON
+## 7. Personalization model
+
+The card should be built around a **specific, affectionate truth**, not just role matching.
+
+### Matching formula
+
+```txt
+role + card intent + build energy + powers + weakness + relic + tiny detail
+→ familiar + earned title + personal relic + signature move + field note
+```
+
+### Personalization slots
+
+Every generated card should include these:
+
+- **Earned title:** a funny nickname or role title that feels specific
+- **Personal relic:** one small object or prop tied to their answers
+- **Signature move:** one special action they perform during the sprint
+- **Field note:** one affectionate line that sounds like a teammate wrote it
+- **Quirk phrase:** an optional short phrase used in flavor, tooltip, or card back later
+
+### Earned title patterns
+
+Use title patterns like:
+
+- Keeper of [specific thing]
+- Captain of [team behavior]
+- The One Who [funny behavior]
+- Patron Saint of [hackathon pain]
+- Whisperer of [technical object]
+- Guardian of [demo outcome]
+- Warden of [chaos source]
+- Tender of [small personal relic]
+
+Examples:
+
+- Keeper of the Tiny Repro
+- Button State Whisperer
+- Guardian of the Happy Path
+- The One Who Reads the Logs
+- Captain of “Just One More Fix”
+- Merge Conflict Therapist
+- Patron Saint of Working Demos
+- Pixel Treaty Negotiator
+- Calm Waters Captain
+
+### Kindness rule
+
+Always make the user sound competent, funny, and loved by their team. Weaknesses should be affectionate, never insulting.
+
+Bad:
+
+```txt
+Bad at planning.
+```
+
+Good:
+
+```txt
+Says “quick fix” with heroic optimism.
+```
+
+Bad:
+
+```txt
+Easily distracted.
+```
+
+Good:
+
+```txt
+Follows one side quest and returns with treasure.
+```
+
+Bad:
+
+```txt
+Doesn’t know CSS.
+```
+
+Good:
+
+```txt
+Negotiates with CSS like it is an ancient spirit.
+```
+
+---
+
+## 8. Card spec JSON
 
 Generate this with GPT-5.5 using structured outputs / JSON schema.
 
@@ -299,11 +519,22 @@ type HackaDeckCardSpec = {
   team_name?: string;
   edition: "AI Engineers Singapore 2026" | string;
   card_number?: number;
+  hatched_at_label?: string; // e.g. "Hatched 12:43 PM"
 
-  archetype_title: string;
+  earned_title: string;
+  archetype_base: string;
+  card_intent: string;
+
   familiar_species: string;
   familiar_descriptor: string;
-  rarity: "Common" | "Uncommon" | "Rare" | "Legendary";
+
+  personal_relic: {
+    name: string;        // "Rubber Duck Lantern"
+    visual: string;      // "a tiny yellow rubber duck holding a warm desk lamp"
+    meaning: string;     // "helps them debug without panic"
+  };
+
+  rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
   print_finish: "Matte" | "Stamped" | "Spot Gloss" | "Metallic Ink";
 
   stats: {
@@ -313,17 +544,23 @@ type HackaDeckCardSpec = {
     Chaos: number;
   };
 
+  stat_icons: {
+    Build: "hammer" | "spark" | "stack";
+    Debug: "bug" | "magnifier" | "lantern";
+    Taste: "star" | "leaf" | "eye";
+    Chaos: "bolt" | "swirl" | "comet";
+  };
+
   signature_move: {
     name: string;
     description: string;
   };
 
-  passive?: {
-    name: string;
-    description: string;
-  };
+  field_note: string;
+  known_for?: string;
+  chaos_tell?: string;
+  quirk_phrase?: string;
 
-  flavor_text: string;
   accent_color: string;
   art_prompt: string;
   negative_prompt_notes: string[];
@@ -338,6 +575,8 @@ type HackaDeckCardSpec = {
 - Do not use copyrighted card-game terminology or named franchise styles.
 - Titles should be short and punchy.
 - Prefer ordinary animals with one clever coding twist.
+- One meaningful personal relic is better than many generic props.
+- Do not crowd the card with lore; save extra copy for the detail page or future manual.
 
 ### Example spec
 
@@ -347,9 +586,17 @@ type HackaDeckCardSpec = {
   "team_name": "Cache Money",
   "edition": "AI Engineers Singapore 2026",
   "card_number": 17,
-  "archetype_title": "Keeper of Header Owl",
+  "hatched_at_label": "Hatched 12:43 PM",
+  "earned_title": "Keeper of the Tiny Repro",
+  "archetype_base": "Bug Hunter",
+  "card_intent": "My actual role today",
   "familiar_species": "Owl",
   "familiar_descriptor": "a calm little debug owl with tiny round glasses and a folded API note",
+  "personal_relic": {
+    "name": "Rubber Duck Lantern",
+    "visual": "a tiny yellow rubber duck holding a warm desk lamp beside the owl",
+    "meaning": "helps them debug without panic"
+  },
   "rarity": "Rare",
   "print_finish": "Stamped",
   "stats": {
@@ -358,15 +605,20 @@ type HackaDeckCardSpec = {
     "Taste": 74,
     "Chaos": 68
   },
+  "stat_icons": {
+    "Build": "hammer",
+    "Debug": "lantern",
+    "Taste": "star",
+    "Chaos": "bolt"
+  },
   "signature_move": {
     "name": "Endpoint Exorcism",
     "description": "Turns one haunted API response into clean JSON."
   },
-  "passive": {
-    "name": "37 Open Tabs",
-    "description": "Loses focus briefly, then finds the exact tab at the worst possible moment."
-  },
-  "flavor_text": "When the docs go silent, Maya starts listening to the headers.",
+  "field_note": "Spotted listening to headers when the docs go quiet.",
+  "known_for": "Finds the one missing env var.",
+  "chaos_tell": "Opens 37 tabs and somehow knows where everything is.",
+  "quirk_phrase": "Show me the headers.",
   "accent_color": "#7A5C3E",
   "art_prompt": "...",
   "negative_prompt_notes": ["no neon", "no holographic effects", "no card text"]
@@ -375,21 +627,21 @@ type HackaDeckCardSpec = {
 
 ---
 
-## 8. Animal mapping guidance
+## 9. Animal mapping guidance
 
-Use this as a soft guide, not a hard rule.
+Use this as a soft guide, not a hard rule. Match emotional behavior, not just role.
 
 | Familiar | Good fit |
 |---|---|
-| Owl | Debugging, review, backend, careful reasoning |
-| Fox | Strategy, prompts, product thinking, APIs |
-| Raccoon | Infra, toolsmithing, chaos, scrappy fixes |
-| Capybara | PM, team glue, calm under pressure |
-| Otter | Frontend, playful builder, collaboration |
-| Crow | Research, memory, docs, synthesis |
-| Cat | Design taste, independence, frontend polish |
-| Turtle | Reliability, backend, persistence |
-| Dog | Demo energy, team support, morale |
+| Owl | Debugging, review, backend, careful reasoning, watches quietly |
+| Fox | Strategy, prompts, product thinking, APIs, clever shortcuts |
+| Raccoon | Infra, toolsmithing, chaos, scrappy fixes, log digging |
+| Capybara | PM, team glue, calm under pressure, scope diplomacy |
+| Otter | Frontend, playful builder, collaboration, demo delight |
+| Crow | Research, memory, docs, synthesis, context gathering |
+| Cat | Design taste, independence, frontend polish, pixel judgment |
+| Turtle | Reliability, backend, persistence, steady deployment |
+| Dog | Demo energy, team support, morale, sponsor friendliness |
 | Moth | Late-night focus, obsessive polish, bright screens |
 | Axolotl | Experimental ideas, resilience, weird charm |
 | Ghost | Debugging invisible failures, async weirdness |
@@ -399,7 +651,39 @@ Use this as a soft guide, not a hard rule.
 
 ---
 
-## 9. Image generation strategy
+## 10. Copy style guide
+
+### Voice
+
+Affectionate, specific, lightly magical, never mean.
+
+### Good phrases
+
+- “Spotted near...”
+- “Known for...”
+- “Summoned by...”
+- “Can sense...”
+- “Gains +12 morale when...”
+- “Turns panic into...”
+- “Returns from side quests with...”
+- “Negotiates with...”
+- “Keeps one tiny...”
+- “Somehow always finds...”
+
+### Phrase examples
+
+- Spotted near the snack table, calmly refactoring reality.
+- Known habitat: wherever the Wi-Fi is strongest.
+- First appeared at 11:42am holding three half-ideas and one good branch.
+- Says “quick fix” with dangerous confidence.
+- Summoned by a failing test and cold coffee.
+- Can de-escalate scope creep with one nod.
+- Found the root cause three folders away from the crime scene.
+- Turns panic into a three-step plan.
+
+---
+
+## 11. Image generation strategy
 
 Use **GPT Image 2** for central familiar art only.
 
@@ -439,7 +723,7 @@ Use this for a demo-only “collector poster” or “rare print” version, not
 
 ---
 
-## 10. Exact familiar art prompt template
+## 12. Exact familiar art prompt template
 
 Use this as the default GPT Image 2 prompt.
 
@@ -457,24 +741,27 @@ A {animal_species} builder familiar representing a hackathon participant.
 
 Participant traits:
 - Role: {role_today}
+- Card intent: {card_intent}
+- Build energy: {build_energy}
 - Strengths: {powers}
 - Harmless weakness: {weakness}
-- Archetype: {archetype}
-- Optional detail: {visual_detail}
+- Earned title: {earned_title}
+- Personal relic: {personal_relic_visual}
+- Tiny personal detail: {tiny_detail}
 
 Visual direction:
-Show the familiar as a clever desk companion with one small developer-themed prop if useful: tiny laptop, sticky note, coffee cup, cable, rubber duck, terminal card, checklist, or small tool. Keep the prop subtle and integrated.
+Show the familiar as a small desk companion observed during a real hackathon. Include exactly one meaningful personal relic or developer-themed prop. The relic should feel specific to this person. One meaningful prop is better than many generic coding objects.
 
 Composition:
 Single centered character, full body visible, generous padding, three-quarter view, clean silhouette. Simple warm background shape or paper-toned backdrop. No card frame.
 
 Constraints:
-No text, no letters, no numbers, no logos, no trademarks, no watermark, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no busy background.
+No text, no letters, no numbers, no logos, no trademarks, no watermark, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no busy background, no wizard robes, no fantasy armor, no magical staffs, no dramatic spell effects, no glowing eyes.
 ```
 
 ---
 
-## 11. Reroll prompt template
+## 13. Reroll prompt template
 
 ```txt
 Create a new variation of the same builder familiar concept.
@@ -482,9 +769,12 @@ Create a new variation of the same builder familiar concept.
 Preserve:
 - same animal species: {animal_species}
 - same role: {role_today}
+- same card intent: {card_intent}
+- same build energy: {build_energy}
 - same strengths: {powers}
 - same harmless weakness: {weakness}
-- same archetype: {archetype}
+- same earned title: {earned_title}
+- same personal relic: {personal_relic_visual}
 - same premium matte editorial field-guide style
 - no text, no logos, no card border
 
@@ -496,12 +786,12 @@ Change:
 
 Keep the character centered, full body visible, with generous padding and a clean silhouette.
 
-Avoid neon, holographic rainbow effects, cyberpunk, glitch, code rain, circuit patterns, and busy backgrounds.
+Avoid neon, holographic rainbow effects, cyberpunk, glitch, code rain, circuit patterns, busy backgrounds, fantasy robes, armor, staffs, and glowing eyes.
 ```
 
 ---
 
-## 12. Rare print-finish prompt template
+## 14. Rare print-finish prompt template
 
 Use as an edit-style enhancement if supported in the implementation.
 
@@ -511,7 +801,7 @@ Create a rarer print-finish version of the same familiar.
 Preserve:
 - same animal species
 - same silhouette
-- same prop
+- same personal relic
 - same warm matte editorial style
 - same restrained palette
 - no text, no logos, no card border
@@ -527,7 +817,7 @@ Avoid neon, holographic rainbow effects, glitch, cyberpunk, code rain, circuit p
 
 ---
 
-## 13. Card rendering implementation
+## 15. Card rendering implementation
 
 Recommended renderer options:
 
@@ -557,10 +847,27 @@ Fastest hackathon path:
 - Use consistent card template across all users.
 - Crop avatar art into a large art window with padding.
 - Add subtle paper grain as CSS/SVG texture if time allows.
+- Use icon components or inline SVG for stats.
+- Always include accessible labels for stat icons in HTML.
+
+### Icon implementation note
+
+Use one simple icon set for speed, such as Lucide, Heroicons, or inline SVGs. Avoid overly detailed icons because they will be small on-card.
+
+Example renderer shape:
+
+```tsx
+const stats = [
+  { key: "Build", value: spec.stats.Build, icon: Hammer, label: "Build" },
+  { key: "Debug", value: spec.stats.Debug, icon: Bug, label: "Debug" },
+  { key: "Taste", value: spec.stats.Taste, icon: Star, label: "Taste" },
+  { key: "Chaos", value: spec.stats.Chaos, icon: Zap, label: "Chaos" },
+];
+```
 
 ---
 
-## 14. Suggested stack
+## 16. Suggested stack
 
 ### Frontend
 
@@ -595,7 +902,7 @@ Store generated art and final PNG URLs. Options:
 
 ---
 
-## 15. Data model
+## 17. Data model
 
 ### `participants`
 
@@ -654,18 +961,19 @@ Store generated art and final PNG URLs. Options:
 
 ---
 
-## 16. Routes
+## 18. Routes
 
 | Route | Purpose |
 |---|---|
 | `/` | QR landing page / quiz |
 | `/card/[id]` | Result page and PNG download |
 | `/gallery` | Live public gallery wall |
+| `/manual` | Optional icon / rarity / familiar reference manual |
 | `/admin` | Optional: force regenerate, hide card, view errors |
 
 ---
 
-## 17. Generation lifecycle
+## 19. Generation lifecycle
 
 1. Create participant record.
 2. Create card run with `queued` status.
@@ -694,7 +1002,7 @@ If PNG rendering fails:
 
 ---
 
-## 18. Reroll behavior
+## 20. Reroll behavior
 
 ### Reroll Art
 
@@ -719,7 +1027,7 @@ Reason: cost control and faster decisions.
 
 ---
 
-## 19. Gallery
+## 21. Gallery
 
 The gallery is the strongest demo artifact.
 
@@ -746,12 +1054,12 @@ Target by 4pm:
 
 ---
 
-## 20. Demo script
+## 22. Demo script
 
 1. Show QR code.
 2. Ask one person nearby to scan.
 3. They answer the quiz in under 60 seconds.
-4. Show generation status: “matching familiar”, “writing move”, “hatching art”, “printing card”.
+4. Show generation status: “matching familiar”, “forging relic”, “writing field note”, “hatching art”, “printing card”.
 5. Reveal their card.
 6. Download PNG.
 7. Open gallery wall with many participant cards.
@@ -760,21 +1068,21 @@ Target by 4pm:
 
 ---
 
-## 21. Judging pitch
+## 23. Judging pitch
 
 Use this short pitch:
 
-> HackaDeck turns a live hackathon into a collectible card wall. Participants scan a QR code, answer a 60-second quiz, and GPT-5.5 transforms their role, strengths, and harmless weakness into a structured card spec. GPT Image 2 hatches a polished animal familiar in our house style, and our renderer turns it into a clean downloadable PNG. The gallery updates live, so the event becomes its own deck of builders.
+> HackaDeck turns a live hackathon into a collectible card wall. Participants scan a QR code, answer a 60-second personality-style quiz, and GPT-5.5 transforms their role, energy, weakness, relic, and tiny personal detail into a structured card spec. GPT Image 2 hatches a polished animal familiar in our house style, and our renderer turns it into a clean downloadable PNG. The gallery updates live, so the event becomes its own deck of builders.
 
 Prize positioning:
 
 - **GPT Image 2:** style-controlled live generation of consistent, shareable familiar art
-- **GPT-5.5:** structured card-spec generation, persona mapping, stat balancing, flavor writing
+- **GPT-5.5:** structured card-spec generation, persona mapping, stat balancing, relic matching, title/field-note writing
 - **Convex:** realtime gallery, statuses, reroll versions, public/private card state
 
 ---
 
-## 22. Build timeline
+## 24. Build timeline
 
 | Time | Target |
 |---|---|
@@ -796,7 +1104,7 @@ At 2pm, if something is not working, cut everything except:
 
 ---
 
-## 23. Acceptance criteria
+## 25. Acceptance criteria
 
 By submission time, the app should support:
 
@@ -812,54 +1120,118 @@ Definition of “good enough”:
 
 - The card looks polished at a glance.
 - The text is readable.
-- The gallery feels coherent.
+- The familiar art feels coherent across the gallery.
+- At least one card makes the user laugh and say “that’s me.”
 - The flow works without the team manually editing outputs.
 
 ---
 
-## 24. Sample card concepts for testing
+## 26. Sample card concepts for testing
 
 ### Maya
 
 - Role: Backend builder
+- Card intent: My actual role today
+- Build energy: Bug hunter
 - Powers: Fixing APIs, reading stack traces, shipping under pressure
 - Weakness: Too many tabs
+- Relic: Rubber duck
 - Familiar: Owl
 - Detail: “I always blame headers first.”
+
+Expected card:
+
+```txt
+Maya
+Keeper of the Tiny Repro
+Familiar: Debug Owl
+Relic: Rubber Duck Lantern
+Move: Endpoint Exorcism
+Turns one haunted API response into clean JSON.
+Field Note: Spotted listening to headers when the docs go quiet.
+```
 
 ### Jules
 
 - Role: Designer / UI polish
+- Card intent: My secret superpower
+- Build energy: Pixel perfectionist
 - Powers: Making ugly things usable, making demos shiny, explaining chaos clearly
 - Weakness: Over-polishes buttons
+- Relic: Whiteboard marker
 - Familiar: Cat
 - Detail: “I can spend 20 minutes choosing a border radius.”
+
+Expected card:
+
+```txt
+Jules
+Pixel Treaty Negotiator
+Familiar: Interface Cat
+Relic: Alignment Marker
+Move: Button State Blessing
+Makes hover, active, and disabled finally agree.
+Field Note: Can sense a 2px imbalance from across the room.
+```
 
 ### Ravi
 
 - Role: Infra / deployment fixer
+- Card intent: My chaotic inner builder
+- Build energy: Deadline gremlin
 - Powers: Debugging weird errors, finding shortcuts, keeping the team calm
 - Weakness: Demo gremlin attractor
+- Relic: Cable mess
 - Familiar: Raccoon
 - Detail: “I have a folder called final-final-v3.”
+
+Expected card:
+
+```txt
+Ravi
+Merge Conflict Archaeologist
+Familiar: Root-Cause Raccoon
+Relic: Emergency Cable Knot
+Move: Blame Without Shame
+Finds the culprit commit and keeps morale intact.
+Field Note: Digs through logs like they contain buried treasure.
+```
 
 ### Lin
 
 - Role: Product / scope keeper
+- Card intent: My team energy
+- Build energy: Team therapist
 - Powers: Keeping the team calm, explaining chaos clearly, talking to sponsors
 - Weakness: Scope creep magnet
+- Relic: Snacks
 - Familiar: Capybara
 - Detail: “I say no gently but often.”
 
+Expected card:
+
+```txt
+Lin
+Calm Waters Captain
+Familiar: Scope Capybara
+Relic: Snack Treaty Mug
+Move: Vibe Alignment
+Turns panic into a three-step plan.
+Field Note: Can de-escalate scope creep with one nod.
+```
+
 ---
 
-## 25. Final design decision summary
+## 27. Final design decision summary
 
 - Use **Builder Familiar** as the default identity form.
 - Use mostly **regular animals** for polish and shareability.
 - Use **Matte Field-Guide** style instead of holo-tech/neon AI visuals.
+- Add **personal relics**, **earned titles**, and **field notes** so cards feel loved.
 - Generate **central art only** with GPT Image 2.
 - Render card layout and text in code.
-- Keep the card simple: large art, name, title, 4 stats, one move, one flavor line.
+- Use **4 icon-based stats** to save space; explain icons later in an optional manual.
+- Make the quiz feel like a playful personality quiz with mostly MCQ answers.
+- Keep the card simple: large art, name, earned title, relic, icon stats, one move, one field note.
 - Make the gallery the main demo moment.
-- Build personal cards first; team cards and battle posters are extensions.
+- Build personal cards first; team cards, manual, and battle posters are extensions.
