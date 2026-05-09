@@ -115,10 +115,33 @@ export function ParticipantDeckStatus(props: {
         </p>
       ) : (
         <p className="mt-4 text-sm leading-6 text-[#655c4e]">
-          The first card spec is generated with structured output, then the run
-          moves to art generation for the next step.
+          {newestRun.status === "done"
+            ? "Your first look is saved to this participant deck."
+            : "Keep this page open while the run moves through the card forge."}
         </p>
       )}
+
+      {deck.selectedCard ? (
+        <div className="mt-5 overflow-hidden rounded-md border border-[#e3d7c4] bg-[#faf7f2]">
+          <img
+            src={
+              deck.selectedCard.selectedLook?.avatarImageUrl ??
+              deck.selectedCard.avatarImageUrl
+            }
+            alt={`${deck.selectedCard.spec.familiar_species} familiar art for ${deck.participant.displayName}`}
+            className="aspect-square w-full object-cover"
+          />
+          <div className="p-4">
+            <p className="text-xs font-semibold tracking-[0.14em] text-[#8d5f3a] uppercase">
+              Look {deck.selectedCard.selectedLook?.lookNumber ?? 1}
+            </p>
+            <p className="mt-2 text-lg font-bold text-[#23201b]">
+              {deck.selectedCard.spec.earned_title} ·{" "}
+              {deck.selectedCard.spec.familiar_species}
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       {newestRun.spec ? (
         <div className="mt-5 rounded-md border border-[#e3d7c4] bg-[#faf7f2] p-4">

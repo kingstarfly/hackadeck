@@ -79,6 +79,10 @@ export const generateForRun = internalAction({
         spec,
       });
 
+      await ctx.scheduler.runAfter(0, internal.artGeneration.generateForRun, {
+        runId: args.runId,
+      });
+
       return { status: "art_generating" };
     } catch (error) {
       await ctx.runMutation(internal.cardSpecState.failSpecGeneration, {

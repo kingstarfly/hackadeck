@@ -29,6 +29,13 @@ export const getParticipantDeck = query({
       .order("desc")
       .take(10);
 
+    const selectedCard = participant.selectedCardId
+      ? await ctx.db.get(participant.selectedCardId)
+      : null;
+    const selectedLook = selectedCard?.selectedLookId
+      ? await ctx.db.get(selectedCard.selectedLookId)
+      : null;
+
     return {
       event: {
         name: event.name,
@@ -40,7 +47,28 @@ export const getParticipantDeck = query({
         recoveryEmail: participant.recoveryEmail,
         teamName: participant.teamName,
         consentGallery: participant.consentGallery,
+        selectedCardId: participant.selectedCardId,
       },
+      selectedCard:
+        selectedCard && selectedCard.participantId === participant._id
+          ? {
+              _id: selectedCard._id,
+              cardNumber: selectedCard.cardNumber,
+              avatarImageUrl: selectedCard.avatarImageUrl,
+              finalPngUrl: selectedCard.finalPngUrl,
+              spec: selectedCard.spec,
+              selectedLook:
+                selectedLook && selectedLook.cardId === selectedCard._id
+                  ? {
+                      _id: selectedLook._id,
+                      lookNumber: selectedLook.lookNumber,
+                      reason: selectedLook.reason,
+                      avatarImageUrl: selectedLook.avatarImageUrl,
+                      finalPngUrl: selectedLook.finalPngUrl,
+                    }
+                  : null,
+            }
+          : null,
       runs: runs.map((run) => ({
         _id: run._id,
         cardNumber: run.cardNumber,

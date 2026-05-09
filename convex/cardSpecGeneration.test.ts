@@ -158,3 +158,90 @@ describe("card spec generation state", () => {
     });
   });
 });
+
+describe("art generation state", () => {
+  it("creates the initial card and look from generated art", async () => {
+    const t = convexTest(schema, modules);
+    const { runId, participantId } = await seedQueuedRun(t);
+
+    await t.mutation(internal.cardSpecState.markSpecGenerating, { runId });
+    await t.mutation(internal.cardSpecState.completeSpecGeneration, {
+      runId,
+      spec: validSpec,
+    });
+
+    const marked = await t.mutation(internal.artState.markArtGenerating, {
+      runId,
+    });
+    const completed = await t.mutation(
+      internal.artState.completeArtGeneration,
+      {
+        runId,
+        avatarImageUrl: "https://example.com/familiar.png",
+      },
+    );
+
+    const run = await t.run((ctx) => ctx.db.get(runId));
+    const participant = await t.run((ctx) => ctx.db.get(participantId));
+    const card = await t.run(async (ctx) =>
+      run?.cardId ? await ctx.db.get(run.cardId) : null,
+    );
+    const look = await t.run(async (ctx) =>
+      card?.selectedLookId ? await ctx.db.get(card.selectedLookId) : null,
+    );
+
+    expect(marked).toMatchObject({
+      artPrompt: validSpec.art_prompt,
+    });
+    expect(completed).toMatchObject({
+      status: "done",
+    });
+    expect(run).toMatchObject({
+      status: "done",
+      cardId: card?._id,
+    });
+    expect(participant?.selectedCardId).toBe(card?._id);
+    expect(card).toMatchObject({
+      eventId: run?.eventId,
+      participantId,
+      runId,
+      cardNumber: 1,
+      selectedLookId: look?._id,
+      spec: validSpec,
+      avatarImageUrl: "https://example.com/familiar.png",
+      isPublic: true,
+    });
+    expect(look).toMatchObject({
+      eventId: run?.eventId,
+      cardId: card?._id,
+      runId,
+      lookNumber: 1,
+      reason: "initial",
+      specSnapshot: validSpec,
+      avatarImageUrl: "https://example.com/familiar.png",
+    });
+  });
+
+  it("records art generation failures on the card run", async () => {
+    const t = convexTest(schema, modules);
+    const { runId } = await seedQueuedRun(t);
+
+    await t.mutation(internal.cardSpecState.markSpecGenerating, { runId });
+    await t.mutation(internal.cardSpecState.completeSpecGeneration, {
+      runId,
+      spec: validSpec,
+    });
+    await t.mutation(internal.artState.failArtGeneration, {
+      runId,
+      errorMessage: "The image request was rejected.",
+    });
+
+    const run = await t.run((ctx) => ctx.db.get(runId));
+
+    expect(run).toMatchObject({
+      status: "error",
+      errorMessage: "The image request was rejected.",
+    });
+    expect(run?.cardId).toBeUndefined();
+  });
+});

@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as artGeneration from "../artGeneration.js";
+import type * as artState from "../artState.js";
 import type * as cardSpecCore from "../cardSpecCore.js";
 import type * as cardSpecGeneration from "../cardSpecGeneration.js";
 import type * as cardSpecState from "../cardSpecState.js";
@@ -21,6 +23,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  artGeneration: typeof artGeneration;
+  artState: typeof artState;
   cardSpecCore: typeof cardSpecCore;
   cardSpecGeneration: typeof cardSpecGeneration;
   cardSpecState: typeof cardSpecState;
