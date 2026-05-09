@@ -1,17 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowRight,
-  Check,
-  CircleHelp,
-  Gem,
-  Mail,
-  Palette,
-  Sparkles,
-  WandSparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Check, Images, Mail, WandSparkles } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Route } from "next";
@@ -20,25 +10,12 @@ import { api } from "../../convex/_generated/api";
 import {
   animalCompanionOptions,
   buildEnergyOptions,
-  cardIntentOptions,
-  powerOptions,
-  relicOptions,
   roleOptions,
-  weaknessOptions,
 } from "@/lib/form-options";
 import { formAnswerSchema } from "@/lib/card-schema";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "hackadeck-form-draft";
-
-const detailExamples = [
-  "I always have 40 tabs open.",
-  "I keep saying the CSS is almost done.",
-  "I brought three chargers and no water bottle.",
-  "I name variables dramatically.",
-  "I keep asking if we need auth.",
-  "I explain bugs with tiny diagrams.",
-] as const;
 
 const roleHints: Record<string, string> = {
   "Frontend builder": "Makes the thing feel real.",
@@ -51,14 +28,6 @@ const roleHints: Record<string, string> = {
   "Product / scope keeper": "Protects the sharp version.",
   "Infra / deployment fixer": "Gets it alive in public.",
   "I am doing everything somehow": "Carries the whole tiny universe.",
-};
-
-const intentHints: Record<string, string> = {
-  "My actual role today": "A faithful builder portrait.",
-  "My chaotic inner builder": "The truest version, emotionally.",
-  "My team energy": "Your place in the group spell.",
-  "My secret superpower": "Make the hidden strength visible.",
-  "Surprise me, but be kind": "Let HackaDeck choose the flattering read.",
 };
 
 const energyHints: Record<string, string> = {
@@ -74,75 +43,8 @@ const energyHints: Record<string, string> = {
   "Last-minute philosopher": "Asks the real question at 4:48.",
 };
 
-const weaknessHints: Record<string, string> = {
-  "Too many tabs": "Browser archaeology.",
-  "Scope creep magnet": "Every idea has potential.",
-  "CSS betrayal": "The layout had other plans.",
-  "Merge conflict aura": "Git knows your name.",
-  "Forgot to eat": "Fueled by momentum.",
-  "Over-polishes buttons": "One more hover state.",
-  "Names variables dramatically": "Every const has lore.",
-  'Says "one quick refactor"': "Famously dangerous words.",
-  "Trusts the API docs too much": "Optimism with headers.",
-  "Demo gremlin attractor": "The laptop senses fear.",
-  "Keeps changing the prompt": "Almost there, one more wording.",
-  "Needs one more coffee": "The classic power source.",
-};
-
-const relicHints: Record<string, string> = {
-  "Coffee cup": "The build potion.",
-  "Rubber duck": "Small debugging witness.",
-  Headphones: "Focus shield enabled.",
-  "Sticky notes": "Thoughts with adhesive.",
-  "Cable mess": "A nest of possibilities.",
-  Hoodie: "Portable comfort mode.",
-  Snacks: "Emergency morale.",
-  "Tiny plant": "Desk-level optimism.",
-  "Whiteboard marker": "Plans become visible.",
-  "Lucky keyboard key": "Tiny talisman.",
-  "Terminal lantern": "Guides the late-night path.",
-  "Surprise me": "Let the card pick the prop.",
-};
-
-const animalHints: Record<string, string> = {
-  "Surprise me": "Best match from your answers.",
-  Owl: "Patient, watchful, precise.",
-  Fox: "Clever shortcuts and product sense.",
-  Raccoon: "Resourceful late-night problem solving.",
-  Capybara: "Unbothered team comfort.",
-  Otter: "Playful, fast, curious.",
-  Crow: "Finds shiny useful things.",
-  Cat: "Selective focus, strong opinions.",
-  Turtle: "Steady progress, durable calm.",
-  Dog: "Loyal momentum and demo energy.",
-  Moth: "Drawn to the glowing screen.",
-};
-
-function FieldText({
-  eyebrow,
-  title,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <p className="text-xs font-semibold tracking-[0.18em] text-[#8d5f3a] uppercase">
-        {eyebrow}
-      </p>
-      <h2 className="text-2xl font-light tracking-tight text-[#23201b]">
-        {title}
-      </h2>
-      {children ? (
-        <p className="max-w-[60ch] text-sm leading-6 text-[#6f6658]">
-          {children}
-        </p>
-      ) : null}
-    </div>
-  );
-}
+const sectionHeaderClassName =
+  "text-lg font-semibold text-[#23201b] sm:text-xl";
 
 function TileRadioGroup({
   name,
@@ -157,12 +59,17 @@ function TileRadioGroup({
   columns?: string;
   hints?: Record<string, string>;
 }) {
+  const hasHints = Object.keys(hints).length > 0;
+
   return (
     <div className={cn("grid gap-3", columns)}>
       {options.map((option) => (
         <label
           key={option}
-          className="group relative min-h-[96px] cursor-pointer rounded-md border border-[#d8ccb9] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#8d5f3a]/60 hover:shadow-[0_12px_28px_rgba(35,32,27,0.08)]"
+          className={cn(
+            "group relative cursor-pointer rounded-md border border-[#d8ccb9] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#8d5f3a]/60 hover:shadow-[0_12px_28px_rgba(35,32,27,0.08)]",
+            hasHints && "min-h-[96px]",
+          )}
         >
           <input
             required
@@ -195,13 +102,9 @@ interface FormDraft {
   displayName?: string;
   teamName?: string;
   roleToday?: string;
-  cardIntent?: string;
   buildEnergy?: string;
-  powers?: string[];
-  weakness?: string;
-  relic?: string;
-  animalCompanionPreference?: string;
-  detail?: string;
+  eli5?: string;
+  animalPreference?: string;
   consentGallery?: boolean;
 }
 
@@ -224,10 +127,90 @@ function saveDraft(draft: FormDraft): void {
 }
 
 const sectionClassName =
-  "mt-12 grid gap-8 border-t border-[#d8ccb9] pt-10 sm:mt-14 sm:pt-12";
-const questionClassName = "grid gap-4";
-const questionLegendClassName =
-  "mb-5 flex items-center gap-2 text-base font-semibold text-[#3c352c]";
+  "mt-10 grid gap-6 border-t border-[#d8ccb9] pt-8 sm:mt-12 sm:pt-10";
+
+function safeAccentColor(color: string) {
+  return /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#8d5f3a";
+}
+
+function LatestCardPreview({ eventSlug }: { eventSlug: string }) {
+  const gallery = useQuery(
+    api.gallery.getEventGallery,
+    eventSlug ? { eventSlug, limit: 3 } : "skip",
+  );
+
+  if (gallery === undefined) {
+    return (
+      <section className="mt-6 rounded-md border border-[#d8ccb9] bg-white/70 p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-[#51493d]">
+          <Images size={16} aria-hidden="true" />
+          Latest cards
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="aspect-[4/5] animate-pulse rounded-md bg-[#ede4d5]"
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (!gallery || gallery.cards.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="mt-6 rounded-md border border-[#d8ccb9] bg-white/72 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-2 text-sm font-semibold text-[#51493d]">
+            <Images size={16} aria-hidden="true" />
+            Latest cards
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[#6f6658]">
+            A peek at what people are hatching from this event.
+          </p>
+        </div>
+        <span className="shrink-0 text-xs font-semibold tracking-wide text-[#8d5f3a] uppercase">
+          Live
+        </span>
+      </div>
+
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        {gallery.cards.map((card) => {
+          const accentColor = safeAccentColor(card.accentColor);
+
+          return (
+            <article
+              key={card._id}
+              className="min-w-0 overflow-hidden rounded-md border border-[#d8ccb9] bg-[#fffaf0]"
+              style={{ borderTopColor: accentColor, borderTopWidth: 4 }}
+            >
+              <div className="aspect-[4/5] bg-[#ede4d5]">
+                <img
+                  src={card.avatarImageUrl}
+                  alt={`${card.earnedTitle} card for ${card.displayName}`}
+                  className="h-full w-full object-contain p-2"
+                />
+              </div>
+              <div className="p-2">
+                <p className="truncate text-xs font-black text-[#332d25]">
+                  {card.displayName}
+                </p>
+                <p className="mt-1 line-clamp-2 min-h-8 text-[11px] leading-4 text-[#6f6658]">
+                  {card.earnedTitle}
+                </p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 export function HackaDeckForm() {
   const router = useRouter();
@@ -237,8 +220,7 @@ export function HackaDeckForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<FormDraft>({});
   const [hydrated, setHydrated] = useState(false);
-  const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
-  const [detailValue, setDetailValue] = useState("");
+  const [eli5Value, setEli5Value] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -250,8 +232,7 @@ export function HackaDeckForm() {
       ...saved,
       ...(recoveryEmail ? { recoveryEmail } : {}),
     });
-    if (saved.powers) setSelectedPowers(saved.powers);
-    setDetailValue(saved.detail ?? "");
+    setEli5Value(saved.eli5 ?? "");
     setHydrated(true);
   }, [searchParams]);
 
@@ -275,68 +256,33 @@ export function HackaDeckForm() {
       displayName: String(fd.get("displayName") ?? ""),
       teamName: String(fd.get("teamName") ?? ""),
       roleToday: String(fd.get("roleToday") ?? ""),
-      cardIntent: String(fd.get("cardIntent") ?? ""),
       buildEnergy: String(fd.get("buildEnergy") ?? ""),
-      powers: fd.getAll("powers").map(String),
-      weakness: String(fd.get("weakness") ?? ""),
-      relic: String(fd.get("relic") ?? ""),
-      animalCompanionPreference: String(
-        fd.get("animalCompanionPreference") ?? "",
-      ),
-      detail: String(fd.get("detail") ?? ""),
+      eli5: String(fd.get("eli5") ?? ""),
+      animalPreference: String(fd.get("animalPreference") ?? ""),
       consentGallery: fd.get("consentGallery") === "on",
     };
     saveDraft(newDraft);
   }, []);
-
-  const powerHelp = useMemo(() => {
-    const remaining = 3 - selectedPowers.length;
-    return remaining === 0
-      ? "Nice trio."
-      : `Pick ${remaining} more ${remaining === 1 ? "power" : "powers"}.`;
-  }, [selectedPowers.length]);
-
-  function togglePower(power: string) {
-    setSelectedPowers((current) => {
-      let next: string[];
-      if (current.includes(power)) {
-        next = current.filter((item) => item !== power);
-      } else if (current.length >= 3) {
-        next = current;
-      } else {
-        next = [...current, power];
-      }
-      // Persist powers change after state update
-      setTimeout(() => persistForm(), 0);
-      return next;
-    });
-  }
-
-  function chooseDetailExample(example: string) {
-    setDetailValue(example);
-    setTimeout(() => persistForm(), 0);
-  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     const formData = new FormData(event.currentTarget);
+    const teamNameRaw = String(formData.get("teamName") ?? "").trim();
+    const animalRaw = String(formData.get("animalPreference") ?? "");
+    const animalPreference =
+      animalRaw && animalRaw !== "Surprise me" ? animalRaw : undefined;
+
     const parsed = formAnswerSchema.safeParse({
       eventSlug: String(formData.get("eventSlug") ?? ""),
       recoveryEmail: String(formData.get("recoveryEmail") ?? ""),
       displayName: String(formData.get("displayName") ?? ""),
-      teamName: String(formData.get("teamName") ?? "") || undefined,
+      teamName: teamNameRaw || undefined,
       roleToday: String(formData.get("roleToday") ?? ""),
-      cardIntent: String(formData.get("cardIntent") ?? ""),
       buildEnergy: String(formData.get("buildEnergy") ?? ""),
-      powers: formData.getAll("powers").map(String),
-      weakness: String(formData.get("weakness") ?? ""),
-      relic: String(formData.get("relic") ?? ""),
-      animalCompanionPreference: String(
-        formData.get("animalCompanionPreference") ?? "",
-      ),
-      detail: String(formData.get("detail") ?? "") || undefined,
+      eli5: String(formData.get("eli5") ?? ""),
+      animalPreference,
       consentGallery: formData.get("consentGallery") === "on",
     });
 
@@ -352,15 +298,13 @@ export function HackaDeckForm() {
         recoveryEmail: parsed.data.recoveryEmail,
         displayName: parsed.data.displayName,
         roleToday: parsed.data.roleToday,
-        cardIntent: parsed.data.cardIntent,
         buildEnergy: parsed.data.buildEnergy,
-        powers: parsed.data.powers,
-        weakness: parsed.data.weakness,
-        relic: parsed.data.relic,
-        animalCompanionPreference: parsed.data.animalCompanionPreference,
+        eli5: parsed.data.eli5,
         consentGallery: parsed.data.consentGallery,
         ...(parsed.data.teamName ? { teamName: parsed.data.teamName } : {}),
-        ...(parsed.data.detail ? { detail: parsed.data.detail } : {}),
+        ...(parsed.data.animalPreference
+          ? { animalPreference: parsed.data.animalPreference }
+          : {}),
       };
       const result = await submitQuiz({ answers });
       router.push(result.deckPath as Route);
@@ -420,11 +364,9 @@ export function HackaDeckForm() {
         )}
       </label>
 
+      <LatestCardPreview eventSlug={eventSlug} />
+
       <section className={sectionClassName}>
-        <FieldText eyebrow="Basics" title="Name your card">
-          The email only helps you find your card again. The name is what goes
-          on the artifact.
-        </FieldText>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="grid gap-2">
             <span className="flex items-center gap-2 text-sm font-semibold text-[#51493d]">
@@ -454,31 +396,26 @@ export function HackaDeckForm() {
               placeholder="Maya"
             />
           </label>
-        </div>
 
-        <label className="grid gap-2">
-          <span className="text-sm font-semibold text-[#51493d]">
-            Team name
-          </span>
-          <input
-            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            defaultValue={draft.teamName}
-            maxLength={40}
-            name="teamName"
-            placeholder="Cache Money"
-          />
-        </label>
+          <label className="grid gap-2 sm:col-span-2">
+            <span className="text-sm font-semibold text-[#51493d]">
+              Team name{" "}
+              <span className="font-normal text-[#6f6658]">(optional)</span>
+            </span>
+            <input
+              className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+              defaultValue={draft.teamName}
+              maxLength={40}
+              name="teamName"
+              placeholder="Cache Money"
+            />
+          </label>
+        </div>
       </section>
 
       <section className={sectionClassName}>
-        <FieldText eyebrow="Builder vibe" title="Choose your silhouette">
-          Fast choices, no overthinking. These steer the title, stats, and field
-          note.
-        </FieldText>
-
-        <fieldset className={questionClassName}>
-          <legend className={questionLegendClassName}>
-            <Sparkles size={16} aria-hidden="true" />
+        <fieldset className="grid gap-4">
+          <legend className={sectionHeaderClassName}>
             What are you mostly doing today?
           </legend>
           <TileRadioGroup
@@ -488,24 +425,12 @@ export function HackaDeckForm() {
             hints={roleHints}
           />
         </fieldset>
+      </section>
 
-        <fieldset className={questionClassName}>
-          <legend className={questionLegendClassName}>
-            <Palette size={16} aria-hidden="true" />
-            What should this card capture?
-          </legend>
-          <TileRadioGroup
-            name="cardIntent"
-            options={cardIntentOptions}
-            defaultValue={draft.cardIntent}
-            hints={intentHints}
-          />
-        </fieldset>
-
-        <fieldset className={questionClassName}>
-          <legend className={questionLegendClassName}>
-            <Zap size={16} aria-hidden="true" />
-            What is your build energy?
+      <section className={sectionClassName}>
+        <fieldset className="grid gap-4">
+          <legend className={sectionHeaderClassName}>
+            What's your build energy?
           </legend>
           <TileRadioGroup
             name="buildEnergy"
@@ -517,124 +442,37 @@ export function HackaDeckForm() {
       </section>
 
       <section className={sectionClassName}>
-        <FieldText eyebrow="Powers" title="Pick your strongest three">
-          Choose 1-3. A tight trio makes a better card than a full resume.
-        </FieldText>
-
-        <fieldset className="grid gap-4">
-          <legend className="sr-only">Hackathon powers</legend>
-          <p className="text-base font-semibold text-[#3c352c]">{powerHelp}</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {powerOptions.map((power) => {
-              const isSelected = selectedPowers.includes(power);
-
-              return (
-                <button
-                  key={power}
-                  className={cn(
-                    "flex min-h-[72px] items-center justify-between rounded-md border px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(35,32,27,0.08)]",
-                    isSelected
-                      ? "border-[#8d5f3a] bg-[#8d5f3a] text-white"
-                      : "border-[#d8ccb9] bg-white text-[#51493d]",
-                  )}
-                  type="button"
-                  onClick={() => togglePower(power)}
-                >
-                  <span>{power}</span>
-                  {isSelected ? <Check size={16} aria-hidden="true" /> : null}
-                </button>
-              );
-            })}
-          </div>
-          {selectedPowers.map((power) => (
-            <input key={power} name="powers" type="hidden" value={power} />
-          ))}
-        </fieldset>
-      </section>
-
-      <section className={sectionClassName}>
-        <FieldText eyebrow="Card ingredients" title="Add the lovable evidence">
-          A harmless flaw, a desk relic, and a familiar choice give the card its
-          tiny story.
-        </FieldText>
-
-        <fieldset className={questionClassName}>
-          <legend className={questionLegendClassName}>
-            <CircleHelp size={16} aria-hidden="true" />
-            Pick your harmless weakness
-          </legend>
-          <TileRadioGroup
-            name="weakness"
-            options={weaknessOptions}
-            defaultValue={draft.weakness}
-            hints={weaknessHints}
-          />
-        </fieldset>
-
-        <fieldset className={questionClassName}>
-          <legend className={questionLegendClassName}>
-            <Gem size={16} aria-hidden="true" />
-            What object belongs on your card?
-          </legend>
-          <TileRadioGroup
-            name="relic"
-            options={relicOptions}
-            defaultValue={draft.relic}
-            columns="sm:grid-cols-3"
-            hints={relicHints}
-          />
-        </fieldset>
-
-        <fieldset className={questionClassName}>
-          <legend className={questionLegendClassName}>
-            <Sparkles size={16} aria-hidden="true" />
-            Pick your familiar, or let us choose
-          </legend>
-          <TileRadioGroup
-            name="animalCompanionPreference"
-            options={animalCompanionOptions}
-            defaultValue={draft.animalCompanionPreference ?? "Surprise me"}
-            columns="sm:grid-cols-3"
-            hints={animalHints}
-          />
-        </fieldset>
-      </section>
-
-      <section className={sectionClassName}>
-        <FieldText eyebrow="Tiny detail" title="Give the card one human tell">
-          Pick an example or write your own. This is optional, but it is often
-          where the funniest card detail comes from.
-        </FieldText>
-
-        <div className="flex flex-wrap gap-3">
-          {detailExamples.map((example) => (
-            <button
-              key={example}
-              className="rounded-full border border-[#d8ccb9] bg-white px-4 py-2.5 text-left text-sm font-medium text-[#51493d] transition hover:border-[#8d5f3a] hover:bg-[#8d5f3a]/8"
-              type="button"
-              onClick={() => chooseDetailExample(example)}
-            >
-              {example}
-            </button>
-          ))}
-        </div>
-
-        <label className="grid gap-3">
-          <span className="text-base font-semibold text-[#3c352c]">
-            Or write the thing your teammates would recognize
+        <label className="grid gap-4">
+          <span className={sectionHeaderClassName}>
+            What are you making? Explain it like I'm five.
           </span>
           <textarea
+            required
             className="min-h-28 resize-y rounded-md border border-[#c9bca8] bg-white px-4 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
-            maxLength={160}
-            name="detail"
-            onChange={(event) => setDetailValue(event.target.value)}
-            placeholder="I always blame headers first."
-            value={detailValue}
+            maxLength={200}
+            name="eli5"
+            onChange={(event) => setEli5Value(event.target.value)}
+            placeholder="We made a helper that reads your emails and tells you which ones matter."
+            value={eli5Value}
           />
-          <span className="text-xs text-[#6f6658]">
-            {detailValue.length}/160 characters
+          <span className="-mt-2 text-xs text-[#6f6658]">
+            {eli5Value.length}/200 characters
           </span>
         </label>
+      </section>
+
+      <section className={sectionClassName}>
+        <fieldset className="grid gap-4">
+          <legend className={sectionHeaderClassName}>
+            Pick your animal companion
+          </legend>
+          <TileRadioGroup
+            name="animalPreference"
+            options={animalCompanionOptions}
+            defaultValue={draft.animalPreference ?? "Surprise me"}
+            columns="grid-cols-2 sm:grid-cols-4"
+          />
+        </fieldset>
       </section>
 
       <label className="mt-4 flex items-start gap-3 rounded-md border border-[#d8ccb9] bg-white p-3">

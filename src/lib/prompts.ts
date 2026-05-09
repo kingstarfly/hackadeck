@@ -3,13 +3,10 @@ import type { FormAnswers } from "@/lib/card-schema";
 export function buildFamiliarArtPrompt(input: {
   animalSpecies: string;
   roleToday: string;
-  cardIntent: string;
   buildEnergy: string;
-  powers: string[];
-  weakness: string;
   earnedTitle: string;
   personalRelicVisual: string;
-  tinyDetail?: string;
+  eli5: string;
 }) {
   return `Create central mascot art only for a vertical collectible hackathon card.
 
@@ -24,16 +21,13 @@ A ${input.animalSpecies} builder familiar representing a hackathon participant.
 
 Participant traits:
 - Role: ${input.roleToday}
-- Card intent: ${input.cardIntent}
 - Build energy: ${input.buildEnergy}
-- Strengths: ${input.powers.join(", ")}
-- Harmless weakness: ${input.weakness}
 - Earned title: ${input.earnedTitle}
 - Personal relic: ${input.personalRelicVisual}
-- Tiny personal detail: ${input.tinyDetail || "None"}
+- What they built: ${input.eli5}
 
 Visual direction:
-Show the familiar as a small desk companion observed during a real hackathon. Include exactly one meaningful personal relic or developer-themed prop. The relic should feel specific to this person. One meaningful prop is better than many generic coding objects.
+Show the familiar as a small desk companion observed during a real hackathon. Include exactly one meaningful personal relic or developer-themed prop connected to what they built. The relic should feel specific to this person. One meaningful prop is better than many generic coding objects.
 
 Composition:
 Single centered character, full body visible, generous padding, three-quarter view, clean silhouette. Simple warm background shape or paper-toned backdrop. No card frame.
@@ -53,19 +47,22 @@ export function buildCardSpecSystemPrompt() {
 }
 
 export function buildCardSpecUserPrompt(answers: FormAnswers) {
+  const teamLine = answers.teamName
+    ? `Team name: ${answers.teamName}`
+    : "Team name: None";
+  const animalLine = answers.animalPreference
+    ? `Animal preference: ${answers.animalPreference}`
+    : "Animal preference: Surprise me";
+
   return `Create a HackaDeck card spec for this participant.
 
 Event: ${answers.eventSlug}
 Recovery email: ${answers.recoveryEmail}
 Display name: ${answers.displayName}
-Team: ${answers.teamName || "None"}
+${teamLine}
 Role today: ${answers.roleToday}
-Card intent: ${answers.cardIntent}
 Build energy: ${answers.buildEnergy}
-Powers: ${answers.powers.join(", ")}
-Harmless weakness: ${answers.weakness}
-Personal relic: ${answers.relic}
-Animal companion preference: ${answers.animalCompanionPreference}
-Detail: ${answers.detail || "None"}
+What they built (ELI5): ${answers.eli5}
+${animalLine}
 Edition: AI Engineers Singapore 2026`;
 }

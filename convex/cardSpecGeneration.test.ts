@@ -20,19 +20,14 @@ const answers = {
   displayName: "Maya",
   teamName: "Cache Money",
   roleToday: "Backend builder",
-  cardIntent: "My actual role today",
   buildEnergy: "Bug hunter",
-  powers: ["Fixing APIs", "Reading stack traces"],
-  weakness: "Too many tabs",
-  relic: "Rubber duck",
-  animalCompanionPreference: "Owl",
-  detail: "I always blame headers first.",
+  eli5: "We made a helper that reads your code and finds the bugs for you.",
+  animalPreference: "Owl",
   consentGallery: true,
 };
 
 const validSpec: NormalizedCardSpec = {
   display_name: "Maya",
-  team_name: "Cache Money",
   edition: "AI Engineers Singapore 2026",
   card_number: 1,
   hatched_at_label: "Hatched 12:43 PM",
@@ -89,7 +84,6 @@ async function seedQueuedRun(t: ReturnType<typeof convexTest>) {
       eventId,
       recoveryEmail: answers.recoveryEmail,
       displayName: answers.displayName,
-      teamName: answers.teamName,
       consentGallery: true,
       createdAt: now,
     });

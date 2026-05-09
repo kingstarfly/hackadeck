@@ -275,21 +275,17 @@ Status copy should feel playful:
 
 ## 6. Quiz design
 
-The quiz should feel like a personality quiz, not a form. Use multiple choice for almost everything. The goal is to generate variety without making people think too hard.
+The quiz should feel like a tiny personality quiz, not a form. The goal is to
+get someone from scan to submission with low inertia, then let GPT-5.5 infer the
+richer card details.
 
 ### Required fields
 
 - Email
 - Display name
-- Team name, optional but encouraged
 - Role today
-- What the card should capture
 - Build energy
-- 2–3 hackathon powers
-- Harmless weakness
-- Personal relic
-- Animal companion preference
-- One tiny personal detail
+- One tiny personal detail, optional
 - Gallery opt-in, default checked
 
 ### Better free-text prompt
@@ -320,11 +316,7 @@ Email is an unverified recovery key for finding generated assets again if the
 participant loses their result link. It is not treated as proof of identity and
 does not create a full account.
 
-#### 3. Team name
-
-Short text, optional.
-
-#### 4. What are you mostly doing today?
+#### 3. What are you mostly doing today?
 
 Single choice:
 
@@ -339,17 +331,7 @@ Single choice:
 - Infra / deployment fixer
 - I am doing everything somehow
 
-#### 5. What should this card capture?
-
-Single choice:
-
-- My actual role today
-- My chaotic inner builder
-- My team energy
-- My secret superpower
-- Surprise me, but be kind
-
-#### 6. What is your build energy?
+#### 4. What is your build energy?
 
 Single choice:
 
@@ -364,88 +346,14 @@ Single choice:
 - Shortcut goblin
 - Last-minute philosopher
 
-#### 7. Pick 2–3 hackathon powers
+#### 5. One recognizable detail
 
-Multi-select:
+Optional short text, supported by example chips. This replaces the older powers,
+weakness, relic, and animal preference questions. If the user leaves it blank,
+the generator should infer a kind, ordinary companion and a simple developer
+prop from role today and build energy.
 
-- Debugging weird errors
-- Making ugly things usable
-- Explaining chaos clearly
-- Shipping under pressure
-- Finding shortcuts
-- Writing prompts
-- Fixing APIs
-- Making demos shiny
-- Keeping the team calm
-- Turning docs into code
-- Reading stack traces
-- Talking to sponsors
-- Naming things beautifully
-- Making the first working version
-- Cutting scope without guilt
-
-#### 8. Pick one harmless weakness
-
-Single choice:
-
-- Too many tabs
-- Scope creep magnet
-- CSS betrayal
-- Merge conflict aura
-- Forgot to eat
-- Over-polishes buttons
-- Names variables dramatically
-- Says “one quick refactor”
-- Trusts the API docs too much
-- Demo gremlin attractor
-- Keeps changing the prompt
-- Needs one more coffee
-
-#### 9. Pick your hackathon relic
-
-Single choice:
-
-- Coffee cup
-- Rubber duck
-- Headphones
-- Sticky notes
-- Cable mess
-- Hoodie
-- Snacks
-- Tiny plant
-- Whiteboard marker
-- Lucky keyboard key
-- Terminal lantern
-- Surprise me
-
-#### 10. Choose your animal companion
-
-Single choice:
-
-- Surprise me
-- Owl
-- Fox
-- Raccoon
-- Capybara
-- Otter
-- Crow
-- Cat
-- Turtle
-- Dog
-- Moth
-
-Rare hidden pool:
-
-- Axolotl
-- Ghost
-- Slime
-- Rock
-- Seedling
-- BSOD Gremlin
-
-Use rare options only when the spec generator decides it fits or when the user selects “Surprise me.”
-
-#### 12. Consent
+#### 6. Consent
 
 Checkbox:
 
@@ -462,9 +370,13 @@ The card should be built around a **specific, affectionate truth**, not just rol
 ### Matching formula
 
 ```txt
-role + card intent + build energy + powers + weakness + relic + tiny detail
+role + build energy + optional tiny detail
 → familiar + earned title + personal relic + signature move + field note
 ```
+
+The generator infers card intent, powers, weakness, relic, and animal companion
+from the short quiz answers. Do not ask participants to tune these before they
+have seen their first card.
 
 ### Personalization slots
 
@@ -664,9 +576,11 @@ The familiar exists in a personal micro-habitat derived from quiz answers. This 
 
 **Input sources** (priority order):
 1. `tiny_detail` — free-text quirk ("40 tabs open", "three chargers")
-2. `weakness` — harmless weakness selection
-3. `relic` — personal relic choice  
-4. `build_energy` — working style
+2. `role_today` — what they are mostly doing
+3. `build_energy` — working style
+
+The generator may invent a simple personal relic or harmless weakness if needed,
+but should not expose that as extra quiz work.
 
 **Environment principles:**
 
@@ -1106,8 +1020,8 @@ number when the card run is created, so in-progress generation can say
 A participant is the lightweight owner record for a recovery email within an
 event. On first submission for an event, create the participant. On later
 submissions with the same normalized recovery email for the same event, reuse
-the participant, update display/team fields from the latest non-empty values,
-and show their existing cards on the deck page.
+the participant, update the display name and gallery consent, clear any legacy
+team name, and show their existing cards on the deck page.
 
 ### `cardRuns`
 
@@ -1414,7 +1328,7 @@ Target by 4pm:
 
 Use this short pitch:
 
-> HackaDeck turns a live hackathon into a collectible card wall. Participants scan a QR code, answer a 60-second personality-style quiz, and GPT-5.5 transforms their role, energy, weakness, relic, and tiny personal detail into a structured card spec. GPT Image 2 hatches a polished animal familiar in our house style, and our renderer turns it into a clean downloadable PNG. The gallery updates live, so the event becomes its own deck of builders.
+> HackaDeck turns a live hackathon into a collectible card wall. Participants scan a QR code, answer a short personality-style quiz, and GPT-5.5 transforms their role, energy, and optional tiny personal detail into a structured card spec with an inferred title, relic, stats, and familiar identity. GPT Image 2 hatches a polished animal familiar in our house style, and our renderer turns it into a clean downloadable PNG. The gallery updates live, so the event becomes its own deck of builders.
 
 Prize positioning:
 

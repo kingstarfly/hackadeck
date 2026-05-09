@@ -11,17 +11,9 @@ describe("HackaDeck schemas and prompts", () => {
       displayName: "Maya",
       teamName: "Cache Money",
       roleToday: "Backend builder",
-      cardIntent: "My actual role today",
       buildEnergy: "Bug hunter",
-      powers: [
-        "Fixing APIs",
-        "Reading stack traces",
-        "Shipping under pressure",
-      ],
-      weakness: "Too many tabs",
-      relic: "Rubber duck",
-      animalCompanionPreference: "Owl",
-      detail: "I always blame headers first.",
+      eli5: "We made a helper that reads your code and finds the bugs for you.",
+      animalPreference: "Owl",
       consentGallery: true,
     });
 
@@ -69,18 +61,11 @@ describe("HackaDeck schemas and prompts", () => {
         art_prompt: buildFamiliarArtPrompt({
           animalSpecies: "Owl",
           roleToday: "Backend builder",
-          cardIntent: "My actual role today",
           buildEnergy: "Bug hunter",
-          powers: [
-            "Fixing APIs",
-            "Reading stack traces",
-            "Shipping under pressure",
-          ],
-          weakness: "Too many tabs",
           earnedTitle: "Keeper of the Tiny Repro",
           personalRelicVisual:
             "a tiny yellow rubber duck holding a warm desk lamp",
-          tinyDetail: "I always blame headers first.",
+          eli5: "We made a helper that reads your code and finds the bugs for you.",
         }),
         negative_prompt_notes: ["no neon", "no card text"],
       }),

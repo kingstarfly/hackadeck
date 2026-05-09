@@ -9,13 +9,9 @@ const formAnswersValidator = v.object({
   displayName: v.string(),
   teamName: v.optional(v.string()),
   roleToday: v.string(),
-  cardIntent: v.string(),
   buildEnergy: v.string(),
-  powers: v.array(v.string()),
-  weakness: v.string(),
-  relic: v.string(),
-  animalCompanionPreference: v.string(),
-  detail: v.optional(v.string()),
+  eli5: v.string(),
+  animalPreference: v.optional(v.string()),
   consentGallery: v.boolean(),
 });
 
@@ -44,22 +40,21 @@ export const submitQuiz = mutation({
     const recoveryEmail = answers.recoveryEmail.trim().toLowerCase();
     const displayName = answers.displayName.trim();
     const teamName = cleanOptional(answers.teamName);
-    const detail = cleanOptional(answers.detail);
+    const eli5 = answers.eli5.trim();
+    const animalPreference = cleanOptional(answers.animalPreference);
 
     assertLength(eventSlug, "Event", 120);
     assertLength(recoveryEmail, "Recovery email", 320);
     assertLength(displayName, "Display name", 24);
+    assertLength(eli5, "Project description", 200);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail)) {
       throw new Error("Enter a valid recovery email.");
     }
     if (teamName && teamName.length > 40) {
       throw new Error("Team name is too long.");
     }
-    if (detail && detail.length > 160) {
-      throw new Error("Tiny detail is too long.");
-    }
-    if (answers.powers.length < 1 || answers.powers.length > 3) {
-      throw new Error("Choose one to three hackathon powers.");
+    if (animalPreference && animalPreference.length > 32) {
+      throw new Error("Animal preference is too long.");
     }
 
     const event = await ctx.db
@@ -92,7 +87,7 @@ export const submitQuiz = mutation({
         eventId: event._id,
         recoveryEmail,
         displayName,
-        ...(teamName ? { teamName } : {}),
+        teamName,
         consentGallery: answers.consentGallery,
         createdAt: now,
       }));
@@ -116,8 +111,9 @@ export const submitQuiz = mutation({
       eventSlug,
       recoveryEmail,
       displayName,
+      eli5,
       ...(teamName ? { teamName } : {}),
-      ...(detail ? { detail } : {}),
+      ...(animalPreference ? { animalPreference } : {}),
     };
 
     const runId = await ctx.db.insert("cardRuns", {

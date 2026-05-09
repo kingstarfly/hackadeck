@@ -18,13 +18,9 @@ const answers = {
   displayName: "Maya",
   teamName: "Cache Money",
   roleToday: "Backend builder",
-  cardIntent: "My actual role today",
   buildEnergy: "Bug hunter",
-  powers: ["Fixing APIs", "Reading stack traces", "Shipping under pressure"],
-  weakness: "Too many tabs",
-  relic: "Rubber duck",
-  animalCompanionPreference: "Owl",
-  detail: "I always blame headers first.",
+  eli5: "We made a helper that reads your code and finds the bugs for you.",
+  animalPreference: "Owl",
   consentGallery: true,
 };
 
@@ -96,7 +92,6 @@ describe("submitQuiz", () => {
         ...answers,
         recoveryEmail: "maya@example.com",
         displayName: "Maya Prime",
-        teamName: "Prompt Ops",
         consentGallery: false,
       },
     });
@@ -115,7 +110,6 @@ describe("submitQuiz", () => {
     expect(second.cardNumber).toBe(2);
     expect(participant).toMatchObject({
       displayName: "Maya Prime",
-      teamName: "Prompt Ops",
       consentGallery: false,
     });
     expect(runs.map((run) => run.cardNumber)).toEqual([1, 2]);

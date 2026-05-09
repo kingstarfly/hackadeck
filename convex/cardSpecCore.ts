@@ -57,13 +57,9 @@ export type FormAnswersForSpec = {
   displayName: string;
   teamName?: string;
   roleToday: string;
-  cardIntent: string;
   buildEnergy: string;
-  powers: string[];
-  weakness: string;
-  relic: string;
-  animalCompanionPreference: string;
-  detail?: string;
+  eli5: string;
+  animalPreference?: string;
   consentGallery: boolean;
 };
 
@@ -86,55 +82,64 @@ export function buildCardSpecUserPrompt(input: {
 }) {
   const { answers } = input;
 
+  const animalLine = answers.animalPreference
+    ? `- Animal preference: ${answers.animalPreference} (use this as familiar_species)`
+    : "- Animal preference: None (pick a fitting animal)";
+
+  const teamLine = answers.teamName
+    ? `- Team name: ${answers.teamName}`
+    : "- Team name: None (leave team_name unset)";
+
   return `Create a HackaDeck card spec for this participant.
 
-Edition: AI Engineers Singapore 2026
-Card number: ${input.cardNumber}
-Hatch label: ${input.hatchedAtLabel}
+=== USE EXACTLY ===
+- display_name: ${answers.displayName}
+${teamLine}
+- edition: AI Engineers Singapore 2026
+- card_number: ${input.cardNumber}
+- hatched_at_label: ${input.hatchedAtLabel}
 
-Participant answers:
-- Display name: ${answers.displayName}
-- Team name: ${answers.teamName || "None"}
+=== EXTRAPOLATE FROM ===
 - Role today: ${answers.roleToday}
-- What the card should capture: ${answers.cardIntent}
+  → archetype_base, signature_move style, Build/Debug stats
 - Build energy: ${answers.buildEnergy}
-- Hackathon powers: ${answers.powers.join(", ")}
-- Harmless weakness: ${answers.weakness}
-- Personal relic: ${answers.relic}
-- Animal companion preference: ${answers.animalCompanionPreference}
-- Tiny personal detail: ${answers.detail || "None"}
+  → earned_title vibe, Taste/Chaos stats, quirk_phrase
+- What they built (ELI5): ${answers.eli5}
+  → field_note, personal_relic, card_intent, known_for
+${animalLine}
 
-Card spec constraints:
-- Use the display name exactly as provided.
-- Use the team name only if one was provided.
-- Set edition, card_number, and hatched_at_label exactly from above.
-- Earned title max 40 characters.
-- Signature move name max 28 characters; description max 90 characters.
-- Field note max 110 characters.
-- Stats must be integers from 40 to 99.
-- accent_color must be a hex color like #7A5C3E.
-- Be affectionate and specific; weaknesses must be kind, never insulting.
-- Prefer regular animals. Only use rare creatures if the answers strongly justify it or the participant asked for surprise.
+=== INFER (don't mention inference) ===
+- card_intent: synthesize identity from role + energy + ELI5
+- familiar_species: if no preference, pick animal matching their energy
+- personal_relic: developer-themed prop connected to what they built
+- known_for, chaos_tell: affectionate, never insulting
 
-The art_prompt field must be a complete prompt for GPT Image 2, generated directly by you. It must follow this exact section order:
+=== CONSTRAINTS ===
+- Earned title max 40 chars, signature move name max 28 chars
+- Field note max 110 chars, signature move description max 90 chars
+- Stats: integers 40-99, balanced across Build/Debug/Taste/Chaos
+- accent_color: hex like #7A5C3E
+- Prefer regular animals unless preference given or answers strongly justify exotic
+
+=== ART PROMPT (generate all 6 sections) ===
 
 SECTION 1: USE CASE
-Include this text: "Create central mascot art only for a vertical collectible hackathon card. This image will be placed inside a rendered card frame. The app will add all text, stats, badges, and layout separately."
+"Create central mascot art only for a vertical collectible hackathon card. This image will be placed inside a rendered card frame. The app will add all text, stats, badges, and layout separately."
 
 SECTION 2: HOUSE STYLE
-Include this text: "Soft 2D illustration in the style of Sumikko Gurashi or gentle children's book art. Muted pastel palette (cream, peach, soft orange, sage, warm gray), minimal or no linework, soft subtle shading. Simple rounded shapes, dot eyes, gentle expressions. Charming but not saccharine - slightly shy, melancholic warmth. Feels like a beloved desk companion collectible."
+"Soft 2D illustration in the style of Sumikko Gurashi or gentle children's book art. Muted pastel palette (cream, peach, soft orange, sage, warm gray), minimal or no linework, soft subtle shading. Simple rounded shapes, dot eyes, gentle expressions. Charming but not saccharine - slightly shy, melancholic warmth. Feels like a beloved desk companion collectible."
 
 SECTION 3: SUBJECT
-Describe the familiar, species, visual descriptor, body language, personal relic, and how the earned title appears in its demeanor.
+Describe the familiar: species, visual descriptor, body language, personal relic, how the earned title shows in demeanor.
 
 SECTION 4: ENVIRONMENT / HABITAT
-Use the tiny detail first if provided, otherwise weakness, relic, and build energy. Make one visible, integrated, affectionate habitat detail.
+Use the ELI5 description to create an affectionate habitat detail connected to what they built. Include the relic naturally.
 
 SECTION 5: COMPOSITION
-Include centered full-body character, generous padding, soft pastel background, no card frame, no border.
+Centered full-body character, generous padding, soft pastel background, no card frame, no border.
 
 SECTION 6: CONSTRAINTS
-Include this text: "No text, no letters, no numbers, no logos, no trademarks, no watermark, no 3D rendering, no product photography, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, no high contrast, no literal screens or browser windows."`;
+"No text, no letters, no numbers, no logos, no trademarks, no watermark, no 3D rendering, no product photography, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, no high contrast, no literal screens or browser windows."`;
 }
 
 export function normalizeGeneratedSpec(spec: CardSpec): NormalizedCardSpec {

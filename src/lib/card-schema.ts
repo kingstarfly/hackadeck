@@ -51,13 +51,9 @@ export const formAnswerSchema = z.object({
   displayName: z.string().min(1).max(24),
   teamName: z.string().max(40).optional(),
   roleToday: z.string().min(1),
-  cardIntent: z.string().min(1),
   buildEnergy: z.string().min(1),
-  powers: z.array(z.string()).min(1).max(3),
-  weakness: z.string().min(1),
-  relic: z.string().min(1),
-  animalCompanionPreference: z.string().min(1),
-  detail: z.string().max(160).optional(),
+  eli5: z.string().min(1).max(200),
+  animalPreference: z.string().max(32).optional(),
   consentGallery: z.boolean(),
 });
 
