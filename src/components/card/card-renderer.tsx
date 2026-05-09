@@ -182,8 +182,7 @@ export function CardRenderer({
             aria-label="Card traits and stats"
           >
             <div className="hd-card__relic" title={spec.personal_relic.meaning}>
-              <span>Relic</span>
-              <strong>{relicName}</strong>
+              <span>{relicName}</span>
             </div>
             <div className="hd-card__stat-grid">
               {STAT_ORDER.map((stat) => (
