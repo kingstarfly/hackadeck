@@ -177,13 +177,13 @@ export function HackaDeckForm() {
 
       <label className="mt-4 flex items-start gap-3 rounded-md border border-[#d8ccb9] bg-white p-3">
         <input
-          required
+          defaultChecked
           className="mt-1 h-4 w-4 accent-[#8d5f3a]"
           name="consentGallery"
           type="checkbox"
         />
         <span className="text-sm font-medium text-[#51493d]">
-          I agree to generate my card and show it in the live gallery.
+          Show my card briefly in the public gallery for hackathon vibes.
         </span>
       </label>
 

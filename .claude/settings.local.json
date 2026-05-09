@@ -1,0 +1,8 @@
+{
+  "skillOverrides": {
+    "design-principles": "off",
+    "excalidraw-diagram": "off",
+    "mobbin-search": "off",
+    "skill-creator": "off"
+  }
+}

@@ -218,7 +218,8 @@ Future manual idea:
 6. App generates central familiar art with GPT Image 2.
 7. App renders final card PNG deterministically.
 8. User sees result page.
-9. User can download PNG, reroll art, or view gallery.
+9. User can download PNG, create another look, pick their favorite card/look,
+   or view gallery.
 10. Card appears on live gallery wall if consented.
 
 Target experience:
@@ -244,6 +245,7 @@ The quiz should feel like a personality quiz, not a form. Use multiple choice fo
 
 ### Required fields
 
+- Email
 - Display name
 - Team name, optional but encouraged
 - Role today
@@ -254,7 +256,7 @@ The quiz should feel like a personality quiz, not a form. Use multiple choice fo
 - Personal relic
 - Familiar preference
 - One tiny personal detail
-- Consent to generate and show card
+- Gallery opt-in, default checked
 
 ### Better free-text prompt
 
@@ -276,11 +278,19 @@ Examples shown as placeholder chips:
 
 Short text.
 
-#### 2. Team name
+#### 2. Email
+
+Required text.
+
+Email is an unverified recovery key for finding generated assets again if the
+participant loses their result link. It is not treated as proof of identity and
+does not create a full account.
+
+#### 3. Team name
 
 Short text, optional.
 
-#### 3. What are you mostly doing today?
+#### 4. What are you mostly doing today?
 
 Single choice:
 
@@ -295,7 +305,7 @@ Single choice:
 - Infra / deployment fixer
 - I am doing everything somehow
 
-#### 4. What should this card capture?
+#### 5. What should this card capture?
 
 Single choice:
 
@@ -305,7 +315,7 @@ Single choice:
 - My secret superpower
 - Surprise me, but be kind
 
-#### 5. What is your build energy?
+#### 6. What is your build energy?
 
 Single choice:
 
@@ -320,7 +330,7 @@ Single choice:
 - Shortcut goblin
 - Last-minute philosopher
 
-#### 6. Pick 2–3 hackathon powers
+#### 7. Pick 2–3 hackathon powers
 
 Multi-select:
 
@@ -340,7 +350,7 @@ Multi-select:
 - Making the first working version
 - Cutting scope without guilt
 
-#### 7. Pick one harmless weakness
+#### 8. Pick one harmless weakness
 
 Single choice:
 
@@ -357,7 +367,7 @@ Single choice:
 - Keeps changing the prompt
 - Needs one more coffee
 
-#### 8. Pick your hackathon relic
+#### 9. Pick your hackathon relic
 
 Single choice:
 
@@ -374,7 +384,7 @@ Single choice:
 - Terminal lantern
 - Surprise me
 
-#### 9. Choose your card form
+#### 10. Choose your card form
 
 Single choice:
 
@@ -383,7 +393,7 @@ Single choice:
 
 Default to Builder Familiar.
 
-#### 10. Familiar preference
+#### 11. Familiar preference
 
 Single choice:
 
@@ -410,12 +420,13 @@ Rare hidden pool:
 
 Use rare options only when the spec generator decides it fits or when the user selects “Surprise me.”
 
-#### 11. Consent
+#### 12. Consent
 
-Checkboxes:
+Checkbox:
 
-- I agree to generate my card.
-- Show my card in the public gallery.
+- Show my card in the public gallery for hackathon vibes.
+
+Default checked.
 
 ---
 
@@ -909,9 +920,11 @@ Store generated art and final PNG URLs. Options:
 ```ts
 {
   _id: Id<"participants">;
+  recoveryEmail: string;
   displayName: string;
   teamName?: string;
   consentGallery: boolean;
+  selectedCardId?: Id<"cards">;
   createdAt: number;
 }
 ```
@@ -922,13 +935,19 @@ Store generated art and final PNG URLs. Options:
 {
   _id: Id<"cardRuns">;
   participantId: Id<"participants">;
+  cardNumber: number;
   status: "queued" | "spec_generating" | "art_generating" | "rendering" | "done" | "error";
   formAnswers: Record<string, unknown>;
+  cardId?: Id<"cards">;
   errorMessage?: string;
   createdAt: number;
   updatedAt: number;
 }
 ```
+
+A card run is one complete quiz submission and generation flow. It becomes a
+card when generation succeeds. Starting over creates a new card run under the
+same recovery email instead of mutating previous answers.
 
 ### `cards`
 
@@ -938,6 +957,7 @@ Store generated art and final PNG URLs. Options:
   participantId: Id<"participants">;
   runId: Id<"cardRuns">;
   cardNumber: number;
+  selectedLookId?: Id<"looks">;
   spec: HackaDeckCardSpec;
   avatarImageUrl: string;
   finalPngUrl?: string;
@@ -946,6 +966,28 @@ Store generated art and final PNG URLs. Options:
   createdAt: number;
 }
 ```
+
+The `cards` row stores the currently selected art and PNG for fast result page
+and gallery reads. The historical generated assets live in `looks`.
+
+### `looks`
+
+```ts
+{
+  _id: Id<"looks">;
+  cardId: Id<"cards">;
+  runId: Id<"cardRuns">;
+  lookNumber: number;
+  reason: "initial" | "art_reroll";
+  specSnapshot: HackaDeckCardSpec;
+  avatarImageUrl: string;
+  finalPngUrl?: string;
+  createdAt: number;
+}
+```
+
+A look is a generated visual output for the same card identity. The result page
+can show an art picker inside the selected card.
 
 ### `teams`
 
@@ -982,9 +1024,10 @@ Store generated art and final PNG URLs. Options:
 5. Start image generation from `spec.art_prompt`.
 6. Save avatar image URL.
 7. Render final PNG.
-8. Save card record.
-9. Set run status `done`.
-10. Gallery query updates live.
+8. Save card record and initial look.
+9. Auto-select the newly completed card for the participant.
+10. Set card run status `done`.
+11. Gallery query updates live.
 
 ### Failure handling
 
@@ -1004,24 +1047,67 @@ If PNG rendering fails:
 
 ## 20. Reroll behavior
 
-### Reroll Art
+### Start New Card
+
+- User can start over from the quiz from the result page.
+- A new card keeps the same recovery email and can reuse display/team defaults.
+- A completed card appears in the result-page card selector.
+- A newly completed card is automatically selected as the participant's current
+  card.
+- Card selector labels should use human-readable card identity, not raw ids:
+
+```txt
+Keeper of the Tiny Repro · Owl · 12:43 PM
+Pixel Treaty Negotiator · Cat · 12:51 PM
+```
+
+Selection copy:
+
+```txt
+Use this card
+```
+
+Meaning: this is the card shown by default on recovery and, if gallery opt-in is
+enabled, the card shown in the public gallery.
+
+### Create Another Look
 
 - Keep same card spec.
 - Generate new avatar art with reroll prompt.
 - Render new PNG.
-- Save as new version.
+- Save as a new `looks` row.
+- Update the main `cards` row to point at the selected look.
+- Keep art picking scoped inside the current card.
+- Limit to 4 total looks per card, including the initial look.
+
+User-facing action copy:
+
+```txt
+Try another look
+```
+
+Selection copy:
+
+```txt
+Use this look
+```
 
 ### Rewrite Text
 
-- Keep original form answers.
-- Generate new card spec.
-- Keep same animal species unless user requests change.
+- Cut from MVP.
+- If added later, model it as a new card run unless there is a strong reason to
+  keep the same answers.
+
+### Edit Answers
+
+- Supported by starting a new card.
+- Do not mutate previous form answers.
 
 ### Limit
 
 Use playful copy:
 
-> You have 2 rerolls before the portal closes.
+> You can try 3 more looks for this card.
 
 Reason: cost control and faster decisions.
 
@@ -1037,6 +1123,7 @@ Minimum viable gallery:
 - Auto-updates when new cards finish
 - Click card to open detail page
 - Show count: “23 builders hatched”
+- Show one selected card per participant/recovery email
 
 Good gallery details:
 
@@ -1045,6 +1132,7 @@ Good gallery details:
 - Big-screen mode
 - Hide private cards
 - Highlight recent card with a small “just hatched” state
+- Let participants choose the card/look that appears in the gallery
 
 Target by 4pm:
 
