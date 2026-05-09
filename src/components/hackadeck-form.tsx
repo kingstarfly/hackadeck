@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Check, WandSparkles } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Route } from "next";
 
@@ -19,14 +19,102 @@ import {
 import { formAnswerSchema } from "@/lib/card-schema";
 import { cn } from "@/lib/utils";
 
+const STORAGE_KEY = "hackadeck-form-draft";
+
+interface FormDraft {
+  recoveryEmail?: string;
+  displayName?: string;
+  teamName?: string;
+  roleToday?: string;
+  cardIntent?: string;
+  buildEnergy?: string;
+  powers?: string[];
+  weakness?: string;
+  relic?: string;
+  animalCompanionPreference?: string;
+  detail?: string;
+  consentGallery?: boolean;
+}
+
+function loadDraft(): FormDraft {
+  if (typeof window === "undefined") return {};
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? (JSON.parse(saved) as FormDraft) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveDraft(draft: FormDraft): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+  } catch {
+    // ignore quota errors
+  }
+}
+
+function clearDraft(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export function HackaDeckForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const submitQuiz = useMutation(api.submissions.submitQuiz);
+  const activeEvents = useQuery(api.events.listActive);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [draft, setDraft] = useState<FormDraft>({});
+  const [hydrated, setHydrated] = useState(false);
   const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const eventSlug = searchParams.get("event") ?? "ai-engineer-hack-2026";
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    const saved = loadDraft();
+    setDraft(saved);
+    if (saved.powers) setSelectedPowers(saved.powers);
+    setHydrated(true);
+  }, []);
+
+  const urlEventSlug = searchParams.get("event");
+  const defaultEventSlug = useMemo(() => {
+    if (urlEventSlug) return urlEventSlug;
+    if (activeEvents && activeEvents.length > 0) return activeEvents[0].slug;
+    return "";
+  }, [urlEventSlug, activeEvents]);
+  const [selectedEventSlug, setSelectedEventSlug] = useState<string | null>(
+    null,
+  );
+  const eventSlug = selectedEventSlug ?? defaultEventSlug;
+
+  // Persist form on change
+  const persistForm = useCallback(() => {
+    if (!formRef.current) return;
+    const fd = new FormData(formRef.current);
+    const newDraft: FormDraft = {
+      recoveryEmail: String(fd.get("recoveryEmail") ?? ""),
+      displayName: String(fd.get("displayName") ?? ""),
+      teamName: String(fd.get("teamName") ?? ""),
+      roleToday: String(fd.get("roleToday") ?? ""),
+      cardIntent: String(fd.get("cardIntent") ?? ""),
+      buildEnergy: String(fd.get("buildEnergy") ?? ""),
+      powers: fd.getAll("powers").map(String),
+      weakness: String(fd.get("weakness") ?? ""),
+      relic: String(fd.get("relic") ?? ""),
+      animalCompanionPreference: String(
+        fd.get("animalCompanionPreference") ?? "",
+      ),
+      detail: String(fd.get("detail") ?? ""),
+      consentGallery: fd.get("consentGallery") === "on",
+    };
+    saveDraft(newDraft);
+  }, []);
 
   const powerHelp = useMemo(() => {
     const remaining = 3 - selectedPowers.length;
@@ -37,15 +125,17 @@ export function HackaDeckForm() {
 
   function togglePower(power: string) {
     setSelectedPowers((current) => {
+      let next: string[];
       if (current.includes(power)) {
-        return current.filter((item) => item !== power);
+        next = current.filter((item) => item !== power);
+      } else if (current.length >= 3) {
+        next = current;
+      } else {
+        next = [...current, power];
       }
-
-      if (current.length >= 3) {
-        return current;
-      }
-
-      return [...current, power];
+      // Persist powers change after state update
+      setTimeout(() => persistForm(), 0);
+      return next;
     });
   }
 
@@ -95,6 +185,7 @@ export function HackaDeckForm() {
         ...(parsed.data.detail ? { detail: parsed.data.detail } : {}),
       };
       const result = await submitQuiz({ answers });
+      clearDraft();
       router.push(result.deckPath as Route);
     } catch (submissionError) {
       setError(
@@ -106,12 +197,49 @@ export function HackaDeckForm() {
     }
   }
 
+  // Don't render until hydrated to avoid defaultValue mismatch
+  if (!hydrated) {
+    return (
+      <div className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-6">
+        <div className="animate-pulse text-[#6f6658]">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <form
+      ref={formRef}
       className="rounded-lg border border-[#d8ccb9] bg-[#fffaf0]/92 p-4 shadow-[0_18px_60px_rgba(35,32,27,0.12)] sm:p-6"
+      onChange={persistForm}
       onSubmit={handleSubmit}
     >
       <input name="eventSlug" type="hidden" value={eventSlug} />
+
+      <label className="mb-4 grid gap-2">
+        <span className="text-sm font-bold text-[#51493d]">Event</span>
+        {activeEvents === undefined ? (
+          <div className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 text-[#6f6658]">
+            Loading events...
+          </div>
+        ) : activeEvents.length === 0 ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-700">
+            No active events found. Check back soon!
+          </div>
+        ) : (
+          <select
+            required
+            className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            value={eventSlug}
+            onChange={(e) => setSelectedEventSlug(e.target.value)}
+          >
+            {activeEvents.map((event) => (
+              <option key={event._id} value={event.slug}>
+                {event.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
@@ -121,6 +249,7 @@ export function HackaDeckForm() {
           <input
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            defaultValue={draft.recoveryEmail}
             name="recoveryEmail"
             placeholder="you@example.com"
             type="email"
@@ -132,6 +261,7 @@ export function HackaDeckForm() {
           <input
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+            defaultValue={draft.displayName}
             maxLength={24}
             name="displayName"
             placeholder="Maya"
@@ -143,6 +273,7 @@ export function HackaDeckForm() {
         <span className="text-sm font-bold text-[#51493d]">Team name</span>
         <input
           className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+          defaultValue={draft.teamName}
           maxLength={40}
           name="teamName"
           placeholder="Cache Money"
@@ -156,7 +287,7 @@ export function HackaDeckForm() {
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
             name="roleToday"
-            defaultValue=""
+            defaultValue={draft.roleToday ?? ""}
           >
             <option disabled value="">
               Choose your lane
@@ -177,7 +308,7 @@ export function HackaDeckForm() {
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
             name="cardIntent"
-            defaultValue=""
+            defaultValue={draft.cardIntent ?? ""}
           >
             <option disabled value="">
               Pick a vibe
@@ -197,7 +328,7 @@ export function HackaDeckForm() {
           required
           className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
           name="buildEnergy"
-          defaultValue=""
+          defaultValue={draft.buildEnergy ?? ""}
         >
           <option disabled value="">
             Choose your energy
@@ -251,7 +382,7 @@ export function HackaDeckForm() {
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
             name="weakness"
-            defaultValue=""
+            defaultValue={draft.weakness ?? ""}
           >
             <option disabled value="">
               Pick one
@@ -272,7 +403,7 @@ export function HackaDeckForm() {
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
             name="relic"
-            defaultValue=""
+            defaultValue={draft.relic ?? ""}
           >
             <option disabled value="">
               Pick one
@@ -295,7 +426,7 @@ export function HackaDeckForm() {
             required
             className="rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
             name="animalCompanionPreference"
-            defaultValue="Surprise me"
+            defaultValue={draft.animalCompanionPreference ?? "Surprise me"}
           >
             {animalCompanionOptions.map((animal) => (
               <option key={animal} value={animal}>
@@ -312,6 +443,7 @@ export function HackaDeckForm() {
         </span>
         <textarea
           className="min-h-24 resize-y rounded-md border border-[#c9bca8] bg-white px-3 py-3 outline-none focus:border-[#8d5f3a] focus:ring-2 focus:ring-[#8d5f3a]/25"
+          defaultValue={draft.detail}
           maxLength={160}
           name="detail"
           placeholder="I always blame headers first."
@@ -320,7 +452,7 @@ export function HackaDeckForm() {
 
       <label className="mt-4 flex items-start gap-3 rounded-md border border-[#d8ccb9] bg-white p-3">
         <input
-          defaultChecked
+          defaultChecked={draft.consentGallery ?? true}
           className="mt-1 h-4 w-4 accent-[#8d5f3a]"
           name="consentGallery"
           type="checkbox"
@@ -332,7 +464,7 @@ export function HackaDeckForm() {
 
       <button
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[#23201b] px-5 py-4 text-base font-black text-[#fffaf0] transition hover:bg-[#3a332a] disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !eventSlug}
         type="submit"
       >
         <WandSparkles size={18} aria-hidden="true" />
