@@ -5,25 +5,26 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --card: oklch(1 0 0);
-  --ink-soft: #6f6658;
-  --accent: oklch(0.97 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* HackaDeck gallery wall palette — cooler website, warm cards */
+  --background: #edeae6; /* cooler stone, gallery wall */
+  --foreground: #2d2a26; /* charcoal */
+  --card: #faf7f2; /* warm cream — cards are the warm objects */
+  --card-foreground: #2d2a26;
+  --popover: #faf7f2;
+  --popover-foreground: #2d2a26;
+  --primary: #2d2a26;
+  --primary-foreground: #faf7f2;
+  --secondary: #e8e4e0; /* cooler secondary */
+  --secondary-foreground: #2d2a26;
+  --muted: #e8e4e0;
+  --muted-foreground: #6f6658;
+  --accent: #e8e4e0;
+  --accent-foreground: #2d2a26;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #dad6d0; /* cooler border */
+  --input: #dad6d0;
+  --ring: #6f6658;
+  --ink-soft: #6f6658;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -50,8 +51,8 @@ body {
   background:
     radial-gradient(
       circle at top left,
-      rgba(141, 95, 58, 0.14),
-      transparent 34rem
+      rgba(141, 95, 58, 0.08),
+      transparent 28rem
     ),
     var(--background);
   font-family:

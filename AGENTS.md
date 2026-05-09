@@ -29,3 +29,9 @@ This is a single-context repo: read root `CONTEXT.md` and relevant ADRs in `docs
 ### Frontend UI
 
 Use shadcn/Radix/Tailwind primitives for standard app controls before creating new one-off elements. Prefer existing components from `src/components/ui`; when a missing shadcn component fits the interaction, add it with the shadcn CLI instead of hand-rolling a lookalike. Bespoke styling is fine for the collectible card renderer and gallery presentation when the artifact needs custom layout.
+
+**UI reference docs:**
+
+- `docs/agents/ui-primitives.md` — component inventory, HackaDeck warm palette, layered contrast system
+- `/swiss-design` skill — Swiss International Style foundations (typography, spacing, opacity hierarchy)
+- `docs/HackaDeck_Product_Spec.md` — full product spec including card layout, quiz design, copy style
