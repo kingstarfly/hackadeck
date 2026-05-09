@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Sparkles } from "lucide-react";
 
 import { HackaDeckForm } from "@/components/hackadeck-form";
@@ -26,7 +27,9 @@ export default function Home() {
         </p>
       </section>
 
-      <HackaDeckForm />
+      <Suspense>
+        <HackaDeckForm />
+      </Suspense>
     </main>
   );
 }
