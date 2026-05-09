@@ -1,6 +1,10 @@
 import { v } from "convex/values";
 
+import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { buildArtRerollPrompt } from "./artRerollPrompt";
+
+const MAX_LOOKS_PER_CARD = 4;
 
 export const getParticipantDeck = query({
   args: {
@@ -131,6 +135,7 @@ export const getParticipantDeck = query({
         _id: run._id,
         cardNumber: run.cardNumber,
         cardId: run.cardId,
+        rerollForCardId: run.rerollForCardId,
         status: run.status,
         errorMessage: run.errorMessage,
         createdAt: run.createdAt,
@@ -214,5 +219,98 @@ export const selectLook = mutation({
     await ctx.db.patch(card._id, { selectedLookId: look._id });
 
     return { selectedLookId: look._id };
+  },
+});
+
+export const requestArtReroll = mutation({
+  args: {
+    eventSlug: v.string(),
+    participantId: v.id("participants"),
+    cardId: v.id("cards"),
+  },
+  handler: async (ctx, args) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q) => q.eq("slug", args.eventSlug))
+      .unique();
+    if (!event) {
+      throw new Error("Event not found.");
+    }
+
+    const participant = await ctx.db.get(args.participantId);
+    if (!participant || participant.eventId !== event._id) {
+      throw new Error("Participant not found for this event.");
+    }
+
+    const card = await ctx.db.get(args.cardId);
+    if (
+      !card ||
+      card.eventId !== event._id ||
+      card.participantId !== participant._id
+    ) {
+      throw new Error("Card not found for this participant deck.");
+    }
+
+    const activeReroll = await ctx.db
+      .query("cardRuns")
+      .withIndex("by_participant", (q) =>
+        q.eq("participantId", participant._id),
+      )
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("rerollForCardId"), card._id),
+          q.or(
+            q.eq(q.field("status"), "queued"),
+            q.eq(q.field("status"), "spec_generating"),
+            q.eq(q.field("status"), "art_generating"),
+            q.eq(q.field("status"), "rendering"),
+          ),
+        ),
+      )
+      .first();
+    if (activeReroll) {
+      throw new Error("A new look is already hatching for this card.");
+    }
+
+    const looks = await ctx.db
+      .query("looks")
+      .withIndex("by_card_and_look_number", (q) => q.eq("cardId", card._id))
+      .collect();
+    if (looks.length >= MAX_LOOKS_PER_CARD) {
+      throw new Error("This card already has all 4 looks.");
+    }
+
+    const now = Date.now();
+    const spec = {
+      ...card.spec,
+      art_prompt: buildArtRerollPrompt(card.spec),
+    };
+    const runId = await ctx.db.insert("cardRuns", {
+      eventId: event._id,
+      participantId: participant._id,
+      cardNumber: card.cardNumber,
+      rerollForCardId: card._id,
+      status: "art_generating",
+      formAnswers: {
+        reason: "art_reroll",
+        cardId: card._id,
+      },
+      spec,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await ctx.scheduler.runAfter(
+      0,
+      internal.artRerollGeneration.generateForRun,
+      {
+        runId,
+      },
+    );
+
+    return {
+      runId,
+      remainingLooks: MAX_LOOKS_PER_CARD - looks.length - 1,
+    };
   },
 });

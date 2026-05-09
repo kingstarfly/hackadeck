@@ -9,6 +9,9 @@
  */
 
 import type * as artGeneration from "../artGeneration.js";
+import type * as artRerollGeneration from "../artRerollGeneration.js";
+import type * as artRerollPrompt from "../artRerollPrompt.js";
+import type * as artRerollState from "../artRerollState.js";
 import type * as artState from "../artState.js";
 import type * as cardSpecCore from "../cardSpecCore.js";
 import type * as cardSpecGeneration from "../cardSpecGeneration.js";
@@ -26,6 +29,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   artGeneration: typeof artGeneration;
+  artRerollGeneration: typeof artRerollGeneration;
+  artRerollPrompt: typeof artRerollPrompt;
+  artRerollState: typeof artRerollState;
   artState: typeof artState;
   cardSpecCore: typeof cardSpecCore;
   cardSpecGeneration: typeof cardSpecGeneration;

@@ -1,7 +1,7 @@
 import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 declare global {
@@ -169,6 +169,7 @@ async function seedParticipantDeck(
     return {
       participantId,
       firstCardId,
+      secondRunId,
       secondCardId,
       secondLookId,
       rerollLookId,
@@ -252,5 +253,132 @@ describe("participant deck", () => {
         lookId: otherDeckIds.rerollLookId,
       }),
     ).rejects.toThrow("Look not found for this card.");
+  });
+
+  it("requests an art reroll as a pending run with preserved identity prompt", async () => {
+    const t = convexTest(schema, modules);
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    const deckIds = await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+
+    const result = await t.mutation(api.deck.requestArtReroll, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+      cardId: deckIds.secondCardId,
+    });
+    const run = await t.run((ctx) => ctx.db.get(result.runId));
+
+    expect(result.remainingLooks).toBe(1);
+    expect(run).toMatchObject({
+      status: "art_generating",
+      cardNumber: 2,
+      rerollForCardId: deckIds.secondCardId,
+      spec: {
+        familiar_species: "Otter",
+        personal_relic: baseSpec.personal_relic,
+      },
+    });
+    expect(run?.cardId).toBeUndefined();
+    expect(run?.spec?.art_prompt).toContain(
+      "Preserve the same Builder Familiar identity",
+    );
+    expect(run?.spec?.art_prompt).toContain("change the pose, expression");
+  });
+
+  it("creates reroll looks with incremented numbering and selects the new look", async () => {
+    const t = convexTest(schema, modules);
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    const deckIds = await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+
+    const { runId } = await t.mutation(api.deck.requestArtReroll, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+      cardId: deckIds.secondCardId,
+    });
+    const marked = await t.mutation(
+      internal.artRerollState.markArtRerollGenerating,
+      { runId },
+    );
+    const completed = await t.mutation(
+      internal.artRerollState.completeArtReroll,
+      {
+        runId,
+        avatarImageUrl: "https://example.com/otter-look-3.png",
+      },
+    );
+
+    const deck = await t.query(api.deck.getParticipantDeck, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+    });
+    const card = await t.run((ctx) => ctx.db.get(deckIds.secondCardId));
+
+    expect(marked?.artPrompt).toContain("SECTION 3: SUBJECT");
+    expect(completed).toMatchObject({ status: "done", lookNumber: 3 });
+    expect(deck?.cards[0]?.looks.map((look) => look.lookNumber)).toEqual([
+      1, 2, 3,
+    ]);
+    expect(deck?.cards[0]?.looks[2]).toMatchObject({
+      reason: "art_reroll",
+      avatarImageUrl: "https://example.com/otter-look-3.png",
+    });
+    expect(card?.selectedLookId).toBe(completed.lookId);
+  });
+
+  it("enforces the 4 look limit and blocks concurrent rerolls", async () => {
+    const t = convexTest(schema, modules);
+    const eventId = await seedEvent(t, "ai-engineer-hack-2026");
+    const deckIds = await seedParticipantDeck(t, {
+      eventId,
+      email: "maya@example.com",
+      displayName: "Maya",
+    });
+    await t.run(async (ctx) => {
+      const now = Date.now();
+      await ctx.db.insert("looks", {
+        eventId: eventId as never,
+        cardId: deckIds.secondCardId,
+        runId: deckIds.secondRunId,
+        lookNumber: 3,
+        reason: "art_reroll",
+        specSnapshot: baseSpec,
+        avatarImageUrl: "https://example.com/otter-look-3.png",
+        createdAt: now,
+      });
+    });
+
+    const pending = await t.mutation(api.deck.requestArtReroll, {
+      eventSlug: "ai-engineer-hack-2026",
+      participantId: deckIds.participantId,
+      cardId: deckIds.secondCardId,
+    });
+
+    await expect(
+      t.mutation(api.deck.requestArtReroll, {
+        eventSlug: "ai-engineer-hack-2026",
+        participantId: deckIds.participantId,
+        cardId: deckIds.secondCardId,
+      }),
+    ).rejects.toThrow("A new look is already hatching for this card.");
+
+    await t.mutation(internal.artRerollState.completeArtReroll, {
+      runId: pending.runId,
+      avatarImageUrl: "https://example.com/otter-look-4.png",
+    });
+
+    await expect(
+      t.mutation(api.deck.requestArtReroll, {
+        eventSlug: "ai-engineer-hack-2026",
+        participantId: deckIds.participantId,
+        cardId: deckIds.secondCardId,
+      }),
+    ).rejects.toThrow("This card already has all 4 looks.");
   });
 });

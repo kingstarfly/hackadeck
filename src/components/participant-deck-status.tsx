@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { Check, Image, LoaderCircle, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Check, Image, LoaderCircle, RotateCcw, Sparkles } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import type { Route } from "next";
 
@@ -71,6 +71,8 @@ export function ParticipantDeckStatus(props: {
   });
   const selectCard = useMutation(api.deck.selectCard);
   const selectLook = useMutation(api.deck.selectLook);
+  const requestArtReroll = useMutation(api.deck.requestArtReroll);
+  const [previewLookId, setPreviewLookId] = useState<Id<"looks"> | null>(null);
 
   const activeRun = deck?.runs.find((run) =>
     ["queued", "spec_generating", "art_generating", "rendering"].includes(
@@ -87,6 +89,21 @@ export function ParticipantDeckStatus(props: {
     ) ??
     selectedCard?.looks[0] ??
     null;
+  const previewLook =
+    selectedCard?.looks.find((look) => look._id === previewLookId) ?? null;
+  const hasPreviewedUnselectedLook =
+    Boolean(previewLook) && previewLook?._id !== selectedCard?.selectedLookId;
+  const activeRerollForSelectedCard =
+    selectedCard && activeRun?.rerollForCardId === selectedCard._id
+      ? activeRun
+      : null;
+  const remainingLooks = selectedCard
+    ? Math.max(0, 4 - selectedCard.looks.length)
+    : 0;
+  const remainingLookCopy =
+    remainingLooks === 1
+      ? "You can try 1 more look for this card."
+      : `You can try ${remainingLooks} more looks for this card.`;
   const activeStep = useMemo(() => {
     if (!activeRun) {
       return SPEC_STEPS[0];
@@ -94,6 +111,10 @@ export function ParticipantDeckStatus(props: {
     const index = Math.floor(activeRun.updatedAt / 3500) % SPEC_STEPS.length;
     return SPEC_STEPS[index];
   }, [activeRun]);
+
+  useEffect(() => {
+    setPreviewLookId(null);
+  }, [selectedCard?._id, selectedCard?.selectedLookId]);
 
   if (deck === undefined) {
     return (
@@ -207,11 +228,70 @@ export function ParticipantDeckStatus(props: {
               </Button>
             </div>
 
+            <div className="border-border bg-card space-y-3 border p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-foreground/70 text-sm">
+                  {remainingLookCopy}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={
+                    remainingLooks === 0 || Boolean(activeRerollForSelectedCard)
+                  }
+                  onClick={() =>
+                    void requestArtReroll({
+                      eventSlug: deck.event.slug,
+                      participantId,
+                      cardId: selectedCard._id as Id<"cards">,
+                    })
+                  }
+                >
+                  {activeRerollForSelectedCard ? (
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="size-4 animate-spin"
+                    />
+                  ) : (
+                    <RotateCcw aria-hidden="true" className="size-4" />
+                  )}
+                  Try another look
+                </Button>
+              </div>
+              {activeRerollForSelectedCard ? (
+                <p className="text-foreground/60 text-sm">Hatching card art…</p>
+              ) : remainingLooks === 0 ? (
+                <p className="text-foreground/60 text-sm">
+                  This card has all 4 looks.
+                </p>
+              ) : null}
+            </div>
+
             <div>
-              <h3 className="text-foreground text-lg font-medium">Looks</h3>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="text-foreground text-lg font-medium">Looks</h3>
+                {hasPreviewedUnselectedLook && previewLook ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() =>
+                      void selectLook({
+                        eventSlug: deck.event.slug,
+                        participantId,
+                        cardId: selectedCard._id as Id<"cards">,
+                        lookId: previewLook._id as Id<"looks">,
+                      })
+                    }
+                  >
+                    <Check aria-hidden="true" className="size-4" />
+                    Use this look
+                  </Button>
+                ) : null}
+              </div>
               <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {selectedCard.looks.map((look) => {
                   const isSelected = look._id === selectedCard.selectedLookId;
+                  const isPreviewed = look._id === previewLookId;
 
                   return (
                     <button
@@ -219,18 +299,11 @@ export function ParticipantDeckStatus(props: {
                       type="button"
                       className={cn(
                         "group bg-card focus-visible:ring-ring/30 border p-2 text-left transition focus-visible:ring-2 focus-visible:outline-none",
-                        isSelected
+                        isSelected || isPreviewed
                           ? "border-foreground"
                           : "border-border hover:border-foreground/40",
                       )}
-                      onClick={() =>
-                        void selectLook({
-                          eventSlug: deck.event.slug,
-                          participantId,
-                          cardId: selectedCard._id as Id<"cards">,
-                          lookId: look._id as Id<"looks">,
-                        })
-                      }
+                      onClick={() => setPreviewLookId(look._id as Id<"looks">)}
                     >
                       <span className="bg-background block aspect-square overflow-hidden">
                         <img
@@ -243,6 +316,10 @@ export function ParticipantDeckStatus(props: {
                         Look {look.lookNumber}
                         {isSelected ? (
                           <Check aria-hidden="true" className="size-4" />
+                        ) : isPreviewed ? (
+                          <span className="text-foreground/50 text-xs">
+                            Preview
+                          </span>
                         ) : null}
                       </span>
                     </button>

@@ -93,6 +93,7 @@ export default defineSchema({
     eventId: v.id("events"),
     participantId: v.id("participants"),
     cardNumber: v.optional(v.number()),
+    rerollForCardId: v.optional(v.id("cards")),
     status: v.union(
       v.literal("queued"),
       v.literal("spec_generating"),
