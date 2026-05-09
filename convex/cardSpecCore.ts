@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const cardSpecSchema = z.object({
   display_name: z.string().min(1).max(24),
-  team_name: z.string().max(40).optional(),
+  team_name: z.string().max(40).nullable().optional(),
   edition: z.string().min(1).max(60),
-  card_number: z.number().int().positive().optional(),
-  hatched_at_label: z.string().max(32).optional(),
+  card_number: z.number().int().positive().nullable().optional(),
+  hatched_at_label: z.string().max(32).nullable().optional(),
   earned_title: z.string().min(1).max(40),
   archetype_base: z.string().min(1).max(40),
   card_intent: z.string().min(1).max(60),
@@ -35,15 +35,21 @@ export const cardSpecSchema = z.object({
     description: z.string().min(1).max(90),
   }),
   field_note: z.string().min(1).max(110),
-  known_for: z.string().max(90).optional(),
-  chaos_tell: z.string().max(90).optional(),
-  quirk_phrase: z.string().max(60).optional(),
+  known_for: z.string().max(90).nullable().optional(),
+  chaos_tell: z.string().max(90).nullable().optional(),
+  quirk_phrase: z.string().max(60).nullable().optional(),
   accent_color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
   art_prompt: z.string().min(400),
   negative_prompt_notes: z.array(z.string()).default([]),
 });
 
 export type CardSpec = z.infer<typeof cardSpecSchema>;
+
+type NullToUndefined<T> = T extends null ? undefined : T;
+type NormalizeNulls<T> = {
+  [K in keyof T]: NullToUndefined<T[K]>;
+};
+export type NormalizedCardSpec = NormalizeNulls<CardSpec>;
 
 export type FormAnswersForSpec = {
   eventSlug: string;
@@ -131,14 +137,15 @@ SECTION 6: CONSTRAINTS
 Include this text: "No text, no letters, no numbers, no logos, no trademarks, no watermark, no 3D rendering, no product photography, no neon, no holographic effects, no cyberpunk, no code rain, no glowing circuit patterns, no wizard robes, no fantasy armor, no magical staffs, no glowing eyes, no harsh outlines, no high contrast, no literal screens or browser windows."`;
 }
 
-export function normalizeGeneratedSpec(spec: CardSpec): CardSpec {
+export function normalizeGeneratedSpec(spec: CardSpec): NormalizedCardSpec {
   return {
     ...spec,
-    team_name: spec.team_name || undefined,
-    hatched_at_label: spec.hatched_at_label || undefined,
-    known_for: spec.known_for || undefined,
-    chaos_tell: spec.chaos_tell || undefined,
-    quirk_phrase: spec.quirk_phrase || undefined,
+    team_name: spec.team_name ?? undefined,
+    card_number: spec.card_number ?? undefined,
+    hatched_at_label: spec.hatched_at_label ?? undefined,
+    known_for: spec.known_for ?? undefined,
+    chaos_tell: spec.chaos_tell ?? undefined,
+    quirk_phrase: spec.quirk_phrase ?? undefined,
     negative_prompt_notes: spec.negative_prompt_notes ?? [],
   };
 }

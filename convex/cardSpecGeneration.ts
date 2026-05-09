@@ -11,7 +11,7 @@ import {
   buildCardSpecUserPrompt,
   cardSpecSchema,
   normalizeGeneratedSpec,
-  type CardSpec,
+  type NormalizedCardSpec,
 } from "./cardSpecCore";
 
 const MODEL_ID = "gpt-5.5";
@@ -70,7 +70,7 @@ export const generateForRun = internalAction({
         throw new Error("The model did not return a valid card spec.");
       }
 
-      const spec: CardSpec = normalizeGeneratedSpec(
+      const spec: NormalizedCardSpec = normalizeGeneratedSpec(
         cardSpecSchema.parse(parsed),
       );
 

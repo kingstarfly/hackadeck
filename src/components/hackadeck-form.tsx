@@ -54,14 +54,6 @@ function saveDraft(draft: FormDraft): void {
   }
 }
 
-function clearDraft(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
-
 export function HackaDeckForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -185,7 +177,6 @@ export function HackaDeckForm() {
         ...(parsed.data.detail ? { detail: parsed.data.detail } : {}),
       };
       const result = await submitQuiz({ answers });
-      clearDraft();
       router.push(result.deckPath as Route);
     } catch (submissionError) {
       setError(

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import type { CardSpec } from "./cardSpecCore";
+import type { NormalizedCardSpec } from "./cardSpecCore";
 import schema from "./schema";
 
 declare global {
@@ -30,7 +30,7 @@ const answers = {
   consentGallery: true,
 };
 
-const validSpec: CardSpec = {
+const validSpec: NormalizedCardSpec = {
   display_name: "Maya",
   team_name: "Cache Money",
   edition: "AI Engineers Singapore 2026",
