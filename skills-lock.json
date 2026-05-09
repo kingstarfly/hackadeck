@@ -55,6 +55,12 @@
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
       "computedHash": "0164a8b1ef998abca426056c6ed8a7716a9d4692fc6daa5378f68381a6dafd24"
     },
+    "swiss-design": {
+      "source": "zeke/swiss-design-skill",
+      "sourceType": "github",
+      "skillPath": "swiss-design/SKILL.md",
+      "computedHash": "06219489ab5db1655af37ddb3efc84242961b9a9ad1fb5a4885c58e8eedf34f3"
+    },
     "tdd": {
       "source": "mattpocock/skills",
       "sourceType": "github",
